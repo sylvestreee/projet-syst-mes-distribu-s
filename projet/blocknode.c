@@ -46,7 +46,7 @@ void *node(void *arg)
         {
             case 0:
                 stat = callrpc("localhost",
-                    PROGNUM, VERSNUM, PROCNUM,
+                    arg[0], arg[1], arg[2],
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_int, (char *)&res) ;
 
