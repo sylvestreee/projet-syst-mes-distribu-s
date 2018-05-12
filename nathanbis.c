@@ -11,6 +11,9 @@
 
 /* on utilise les thread pour lancer à la fois un server et un client pour un seul noeud*/
 
+int res, n;
+enum clnt_stat stat;
+
 void hello()
 {
     printf("Hello world");
@@ -25,16 +28,16 @@ void *node_server(void *arg)
          /* versnum */ VERSNUM,
          /* procnum */ PROCNUM,
          /* argument encoding filter */ (xdrproc_t) xdr_void,
-         /* argument */ //(char *)&n,
-         /* return value decoding filter */ (xdrproc_t) xdr_void);//,
-         /* retour value */ //(char *)&res) ;
+         /* argument */ (char *)&n,
+         /* return value decoding filter */ (xdrproc_t) xdr_void,
+         /* retour value */ (char *)&res);
 
    if (stat != RPC_SUCCESS)
    {
      fprintf(stderr, "Echec de l'appel distant\n");
      clnt_perrno(stat);
      fprintf(stderr, "\n");
-     return 1;
+     pthread_exit(NULL);
    }
  
    //printf("n : %s\n",n);
