@@ -1,1 +1,4 @@
-/** Peut se connecter à d'autres blockode à travers le serveur principale **/
+#include <stdio.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#include <rpc/rpc.h>
