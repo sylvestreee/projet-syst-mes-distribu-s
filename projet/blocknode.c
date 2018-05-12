@@ -38,6 +38,9 @@ void *node(void *arg)
     enum clnt_stat stat ;
     static int res;
 
+	char * argu = (char *) arg;
+	printf("%s\n",argu);
+
     while(stop != 1)
     {
         printf(">");
@@ -46,7 +49,7 @@ void *node(void *arg)
         {
             case 0:
                 stat = callrpc("localhost",
-                    arg[0], arg[1], arg[2],
+                    1, 1, 1,
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_int, (char *)&res) ;
 
