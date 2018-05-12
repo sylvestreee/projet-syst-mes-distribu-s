@@ -1,18 +1,10 @@
-#<?php
-		 if(isset($error))
-		 {
-		 	echo $error;
-		 }
-		?>include <rpc/types.h>
+#include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <rpc/rpc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <time.h>
-
-//#include "types.h"
 
 #define PROGNUM 0x20000135
 #define VERSNUM 1
@@ -25,34 +17,23 @@ void hello()
     printf("Hello world");
 }
 
-void quit()
-{
-
-}
-
-void *thread_client(void *arg)
+void *node_server(void *arg)
 {
     printf("launching server\n");
-
-    //..
-
-    printf("node terminated\n");
-
+    
     pthread_exit(NULL);
 }
 
 int main(void)
 {
     pthread_t thread_client;
-
-    if(pthread_create(&thread_client, NULL, thread_client, NULL) == -1)
-    {
+    
+    if(pthread_create(&thread_client, NULL, node_server, NULL) == -1){
         perror("pthread_create");
         return EXIT_FAILURE;
     }
 
-    if(registerrpc(PROGNUM, VERSNUM, PNUM_HELLO, hello, (xdrproc_t)xdr_void, (xdrproc_t)xdr_void) == -1)
-    {
+    if(registerrpc(PROGNUM, VERSNUM, PROCNUM, hello, (xdrproc_t)xdr_void, (xdrproc_t)xdr_void) == -1){
         fprintf(stderr, "unable to register 'hello' !\n");
         return EXIT_FAILURE;
     }
@@ -65,19 +46,8 @@ int main(void)
         perror("pthread_join");
         return EXIT_FAILURE;
     }
+
+    
+
     return EXIT_SUCCESS;
-}<?php
-		 if(isset($error))
-		 {
-		 	echo $error;
-		 }
-:
-
-
-
-
-:q
-
-
-
-		?>
+}
