@@ -1,4 +1,3 @@
-#include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <rpc/rpc.h>
 #include <stdio.h>
@@ -21,6 +20,26 @@ void *node_server(void *arg)
 {
     printf("launching server\n");
     
+    stat = callrpc(/* host */ "turing",
+         /* prognum */ PROGNUM,
+         /* versnum */ VERSNUM,
+         /* procnum */ PROCNUM,
+         /* argument encoding filter */ (xdrproc_t) xdr_void,
+         /* argument */ //(char *)&n,
+         /* return value decoding filter */ (xdrproc_t) xdr_void);//,
+         /* retour value */ //(char *)&res) ;
+
+   if (stat != RPC_SUCCESS)
+   {
+     fprintf(stderr, "Echec de l'appel distant\n");
+     clnt_perrno(stat);
+     fprintf(stderr, "\n");
+     return 1;
+   }
+ 
+   //printf("n : %s\n",n);
+   //printf("res : %s\n", res);
+
     pthread_exit(NULL);
 }
 
@@ -46,8 +65,5 @@ int main(void)
         perror("pthread_join");
         return EXIT_FAILURE;
     }
-
-    
-
     return EXIT_SUCCESS;
 }
