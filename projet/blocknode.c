@@ -82,7 +82,6 @@ void *node(void *arg)
                     fprintf(stderr, "Echec de l'appel distant\n") ;
                     clnt_perrno(stat) ;
                     fprintf(stderr, "\n") ;
-                    //return 1 ;
                 }
                 break;
             case 1:
