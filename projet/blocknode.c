@@ -90,6 +90,11 @@ int main(int argc, char ** argv)
 	PROGNUM = bn.num;
 	VERSNUM = bn.num;
 	PROCNUM = bn.num;
+	
+	int arg[3];
+	arg[0] = PROGNUM;
+	arg[1] = VERSNUM;
+	arg[2] = PROCNUM;
 
 	for(i = 2; i < argc; i++)
 	{
@@ -97,7 +102,7 @@ int main(int argc, char ** argv)
 	}
 	printf("%d\n",bn.block_node_connect[0]);
     
-    if(pthread_create(&thread_client, NULL, node, NULL) == -1){
+    if(pthread_create(&thread_client, NULL, node, arg) == -1){
         perror("pthread_create");
         return EXIT_FAILURE;
     }
