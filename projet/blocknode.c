@@ -10,6 +10,18 @@
 #define VERSNUM 1
 #define PROCNUM 1
 
+typedef struct block {
+	
+};
+
+typedef struct block_node {
+	int num;
+	int block_node_connect[10];
+	struct block b[10];
+	char * requests[10];
+};
+
+
 /* on utilise les thread pour lancer à la fois un server et un client pour un seul noeud*/
 
 int * hello(void)
@@ -64,6 +76,23 @@ void *node(void *arg)
 int main(void)
 {
     pthread_t thread_client;
+	int i = 0;
+
+
+	if(argc < 3 || argc >= 12)
+	{
+		printf("To few argument\n");
+		return 0;
+	}
+	
+	struct block_node bn;
+	bn.num = atoi(argv[1]);
+
+	for(i = 2; i < argc; i++)
+	{
+		bn.block_node_connect[i-2] = atoi(argv[i]);
+	}
+	printf("%d\n",bn.block_node_connect[0]);
     
     if(pthread_create(&thread_client, NULL, node, NULL) == -1){
         perror("pthread_create");
