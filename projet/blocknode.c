@@ -46,18 +46,6 @@ void *node(void *arg)
 	char * argu = (char *) arg;
 	printf("%s\n",argu);
 
-   	char *token;
-   
-   	/* get the first token */
-   	token = strtok(argu," ");
-   
-   	/* walk through other tokens */
-   	while( token != NULL ) {
-    	printf( " %s\n", token );
-    
-      	token = strtok(NULL, " ");
-   	}
-
     while(stop != 1)
     {
         printf(">");
@@ -110,11 +98,6 @@ int main(int argc, char ** argv)
 	PROGNUM = bn.num;
 	VERSNUM = bn.num;
 	PROCNUM = bn.num;
-	
-	int arg[3];
-	arg[0] = PROGNUM;
-	arg[1] = VERSNUM;
-	arg[2] = PROCNUM;
 
 	for(i = 2; i < argc; i++)
 	{
@@ -122,7 +105,7 @@ int main(int argc, char ** argv)
 	}
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
-    if(pthread_create(&thread_client, NULL, node, arg) == -1){
+    if(pthread_create(&thread_client, NULL, node, argv[1]) == -1){
         perror("pthread_create");
         return EXIT_FAILURE;
     }
