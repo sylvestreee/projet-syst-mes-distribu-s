@@ -3,12 +3,9 @@
 #include <rpc/xdr.h>
 #include <rpc/rpc.h>
 
-
 #define PROGNUM 0x20000100
 #define VERSNUM 1
 #define PROCNUM 1
-
-
 
 int main (int argc, char **argv)
 {
