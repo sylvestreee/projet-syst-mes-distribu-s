@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 
 typedef struct block {
@@ -38,8 +39,24 @@ void *node(void *arg)
     enum clnt_stat stat ;
     static int res;
 
+	int PROGNUM;
+	int VERSNUM;
+	int PROCNUM;
+
 	char * argu = (char *) arg;
 	printf("%s\n",argu);
+
+   	char *token;
+   
+   	/* get the first token */
+   	token = strtok(argu," ");
+   
+   	/* walk through other tokens */
+   	while( token != NULL ) {
+    	printf( " %s\n", token );
+    
+      	token = strtok(NULL, " ");
+   	}
 
     while(stop != 1)
     {
@@ -49,7 +66,7 @@ void *node(void *arg)
         {
             case 0:
                 stat = callrpc("localhost",
-                    1, 1, 1,
+                   	/*PROGNUM, VERSNUM, PROCNUM,*/1,1,1,
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_int, (char *)&res) ;
 
@@ -77,7 +94,7 @@ int main(int argc, char ** argv)
 {
     pthread_t thread_client;
 	int i = 0;
-	float PROGNUM;
+	int PROGNUM;
 	int VERSNUM;
 	int PROCNUM;
 
@@ -103,7 +120,7 @@ int main(int argc, char ** argv)
 	{
 		bn.block_node_connect[i-2] = atoi(argv[i]);
 	}
-	printf("%f, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
+	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
     if(pthread_create(&thread_client, NULL, node, arg) == -1){
         perror("pthread_create");
