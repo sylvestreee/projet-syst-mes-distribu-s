@@ -6,9 +6,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define PROGNUM 0x20000135
-#define VERSNUM 1
-#define PROCNUM 1
 
 typedef struct block {
 	
@@ -77,7 +74,9 @@ int main(void)
 {
     pthread_t thread_client;
 	int i = 0;
-
+	float PROGNUM;
+	int VERSNUM;
+	int PROCNUM;
 
 	if(argc < 3 || argc >= 12)
 	{
@@ -87,6 +86,10 @@ int main(void)
 	
 	struct block_node bn;
 	bn.num = atoi(argv[1]);
+
+	PROGNUM = bn.num;
+	VERSNUM = bn.num;
+	PROCNUM = bn.num;
 
 	for(i = 2; i < argc; i++)
 	{
