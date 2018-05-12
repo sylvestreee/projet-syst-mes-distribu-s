@@ -103,7 +103,7 @@ int main(int argc, char ** argv)
 	{
 		bn.block_node_connect[i-2] = atoi(argv[i]);
 	}
-	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
+	printf("%f, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
     if(pthread_create(&thread_client, NULL, node, arg) == -1){
         perror("pthread_create");
