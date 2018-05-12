@@ -39,13 +39,6 @@ void *node(void *arg)
     enum clnt_stat stat ;
     static int res;
 
-	int PROGNUM;
-	int VERSNUM;
-	int PROCNUM;
-
-	char * argu = (char *) arg;
-	printf("%s\n",argu);
-
     while(stop != 1)
     {
         printf(">");
@@ -53,8 +46,9 @@ void *node(void *arg)
         switch(ask)
         {
             case 0:
+				scanf("%d",&ask);
                 stat = callrpc("localhost",
-                   	/*PROGNUM, VERSNUM, PROCNUM,*/1,1,1,
+                   	/*PROGNUM, VERSNUM, PROCNUM,*/ask,ask,ask,
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_int, (char *)&res) ;
 
@@ -105,12 +99,13 @@ int main(int argc, char ** argv)
 	}
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
-    if(pthread_create(&thread_client, NULL, node, argv[1]) == -1){
+    if(pthread_create(&thread_client, NULL, node, NULL) == -1){
         perror("pthread_create");
         return EXIT_FAILURE;
     }
 
-    if(registerrpc(PROGNUM, VERSNUM, PROCNUM, hello, (xdrproc_t)xdr_void, (xdrproc_t)xdr_int) == -1){
+    if(registerrpc(PROGNUM, VERSNUM, PROCNUM, hello, (xdrproc_t)xdr_void, 
+		(xdrproc_t)xdr_int) == -1){
         fprintf(stderr, "unable to register 'hello' !\n");
         return EXIT_FAILURE;
     }
