@@ -70,7 +70,7 @@ void *node(void *arg)
     pthread_exit(NULL);
 }
 
-int main(void)
+int main(int argc, char ** argv)
 {
     pthread_t thread_client;
 	int i = 0;
