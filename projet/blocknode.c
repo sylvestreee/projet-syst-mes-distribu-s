@@ -9,7 +9,7 @@
 
 
 typedef struct block {
-	
+	int depth;	
 };
 
 typedef struct block_node {
@@ -30,6 +30,31 @@ int * hello(void)
     return &r;
 }
 
+int * create_block(void)
+{
+	
+}
+
+int * ask_for_blocks(void)
+{
+
+}
+
+int * transmit_blocks(void)
+{
+
+}
+
+int * transmit_requests(void)
+{
+
+}
+
+int * transmit_blockchain_points(void)
+{
+
+} 
+
 void *node(void *arg)
 {
     printf("launching server\n");
@@ -48,7 +73,7 @@ void *node(void *arg)
             case 0:
 				scanf("%d",&ask);
                 stat = callrpc("localhost",
-                   	/*PROGNUM, VERSNUM, PROCNUM,*/ask,ask,ask,
+                   	ask,ask,ask,
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_int, (char *)&res) ;
 
