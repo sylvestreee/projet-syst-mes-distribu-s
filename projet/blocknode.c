@@ -5,19 +5,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <string.h>
-
-
-typedef struct block {
-	int depth;	
-};
-
-typedef struct block_node {
-	int num;
-	int block_node_connect[10];
-	struct block b[10];
-	char * requests[10];
-};
 
 
 /* on utilise les thread pour lancer à la fois un server et un client pour un seul noeud*/
