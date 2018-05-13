@@ -20,7 +20,7 @@ int * hello(void)
 
 int * create_block(block_node * bn)
 {
-	printf("%d\n",bn->num);
+	printf("create block%d\n",bn->num);
 	return &bn->num;
 }
 
