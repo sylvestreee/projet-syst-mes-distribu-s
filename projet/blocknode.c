@@ -141,13 +141,14 @@ int main(int argc, char ** argv)
     }
 
     if(registerrpc(PROGNUM, VERSNUM, PROCNUM, hello, (xdrproc_t)xdr_void, 
-		(xdrproc_t)xdr_int) == -1){
+		(xdrproc_t)xdr_char) == -1){
         fprintf(stderr, "unable to register 'hello' !\n");
         return EXIT_FAILURE;
     }
 
-	if(registerrpc(PROGNUM, VERSNUM, PROCNUM+1, create_block, (xdrproc_t)xdr_block_node, 
-		(xdrproc_t)xdr_int) == -1){
+	if(registerrpc(PROGNUM, VERSNUM, PROCNUM+1, create_block, 	
+		xdr_block_node, 
+		(xdrproc_t)xdr_char) == -1){
         fprintf(stderr, "unable to register 'create_block' !\n");
         return EXIT_FAILURE;
     }
