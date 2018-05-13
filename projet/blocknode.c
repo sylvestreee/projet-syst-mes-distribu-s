@@ -106,10 +106,13 @@ void *node(void *arg)
     block_node * bn = (block_node *) arg;
 	
     int stop = 0;
-    int ask;
+    int ask,i;
     enum clnt_stat stat;
     static int res;
-
+	for(i = 0; i < 10; i++)
+	{
+		printf("%d\n",bn->b[i]->depth);	
+	} 
 	printf("%d\n",bn->num);
 
     while(stop != 1)
