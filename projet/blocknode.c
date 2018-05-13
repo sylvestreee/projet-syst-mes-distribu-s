@@ -10,7 +10,7 @@
 
 /* on utilise les thread pour lancer à la fois un server et un client pour un seul noeud*/
 
-int array(block *b)
+/*int array(block *b)
 {
     int i = 0;
     while(b[i] != NULL)
@@ -18,7 +18,7 @@ int array(block *b)
         i++;
     }
     return i;
-}
+}*/
 
 int *hello(void)
 {
@@ -31,7 +31,7 @@ int *hello(void)
 int *create_block(block_node *bn)
 {
 	printf("create block %d\n",bn->num);
-	return &bn->num;
+	return (int *)1;
 	/*
     int i = 0, length = array(bn->b);
     block *bl = (block *) malloc(sizeof(block));
@@ -146,10 +146,11 @@ void *node(void *arg)
                     fprintf(stderr, "\n");
 					pthread_exit(NULL);
                 }
-				printf("%d\n",res);
                 break;
             case 2:
-			case 3:
+		break;
+		case 3:
+		break;
 			case 4:
 				stop = 1;
 				pthread_exit(NULL);

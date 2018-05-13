@@ -14,24 +14,24 @@ struct block
 	request requests[NB];
 };
 
+struct participant_node {
+	int value;
+	int block_node_connect[NB]; 
+};
+
+typedef struct participant_node participant_node;
+
 typedef struct block block;
 
 struct block_node {
 	int num;
 	int block_node_connect[NB];
 	block b[NB]; // blockchain
-	participant_node p[NB]; // participant_node which are connected to the blocknode
+	//participant_node p[NB]; // participant_node which are connected to the blocknode
 	request requests[NB];
 };
 
 typedef struct block_node block_node;
-
-struct participant_node {
-	int value;
-	int block_node_connect[NB]; 
-}
-
-typedef struct participant_node participant_node;
 
 block * malloc_block(void);
 
