@@ -11,8 +11,10 @@ struct block
 	int depth;
 	int creator;
 	// hash
-	request requests[NB];
+	//request requests[NB];
 };
+
+typedef struct block block;
 
 struct participant_node {
 	int value;
@@ -20,8 +22,6 @@ struct participant_node {
 };
 
 typedef struct participant_node participant_node;
-
-typedef struct block block;
 
 struct block_node {
 	int num;
@@ -32,10 +32,6 @@ struct block_node {
 };
 
 typedef struct block_node block_node;
-
-block * malloc_block(void);
-
-block_node * malloc_block_node(void);
 
 bool_t xdr_request(XDR * xdrs, char * request);
 
