@@ -10,7 +10,17 @@
 
 /* on utilise les thread pour lancer à la fois un server et un client pour un seul noeud*/
 
-int * hello(void)
+int array(block *b)
+{
+    int i = 0;
+    while(b[i] != NULL)
+    {
+        i++;
+    }
+    return i;
+}
+
+int *hello(void)
 {
     static int r = 0;
     printf("Hello world\n");
@@ -18,10 +28,55 @@ int * hello(void)
     return &r;
 }
 
-int * create_block(block_node * bn)
+int *create_block(block_node *bn)
 {
 	printf("create block %d\n",bn->num);
 	return &bn->num;
+	/*
+    int i = 0, length = array(bn->b);
+    block *bl = (block *) malloc(sizeof(block));
+    
+    // empty blockchain
+    if(bn->b[0] == NULL)
+    {
+        bl->depth = 0;
+        bl->creator = bn->num;
+        // hash
+        while(bn->requests[i] != NULL)
+        {
+            bl->requests[i] = bn->requests[i];
+            bn->requests[i] = NULL;
+            i++;
+        }
+        bn->b[0] = bl;
+    }
+
+    // blockchain's not full
+    if(length < NB)
+    {
+        bl->depth = length;
+        bl->creator = bn->num;
+        // hash
+        while(bn->requests[i] != NULL)
+        {
+            b->requests[i] = bn->requests[i];
+            bn->requests[i] = NULL;
+            i++;
+        }
+        bn->b[length] = bl;
+    }
+
+    // blockchain's full
+    else if(length == NB)
+    {
+        free(bl);
+        return -1;
+    }
+
+    // transmit_blockchain_points
+    printf("create block in %d\n", bn->num);
+    return 0;*/
+	
 }
 
 int * ask_for_blocks(void)
@@ -52,7 +107,7 @@ void *node(void *arg)
 	
     int stop = 0;
     int ask;
-    enum clnt_stat stat ;
+    enum clnt_stat stat;
     static int res;
 
 	printf("%d\n",bn->num);
@@ -68,13 +123,13 @@ void *node(void *arg)
                 stat = callrpc("localhost",
                    	ask,ask,1,
                     (xdrproc_t)xdr_void, (void *)0,
-                    (xdrproc_t)xdr_char, (char *)&res) ;
+                    (xdrproc_t)xdr_int, (char *)&res);
 
                 if (stat != RPC_SUCCESS)
                 {
-                    fprintf(stderr, "Echec de l'appel distant\n") ;
-                    clnt_perrno(stat) ;
-                    fprintf(stderr, "\n") ;
+                    fprintf(stderr, "Echec de l'appel distant\n");
+                    clnt_perrno(stat);
+                    fprintf(stderr, "\n");
 					pthread_exit(NULL);
                 }
                 break;
@@ -86,9 +141,9 @@ void *node(void *arg)
 
                 if (stat != RPC_SUCCESS)
                 {
-                    fprintf(stderr, "Echec de l'appel distant\n") ;
-                    clnt_perrno(stat) ;
-                    fprintf(stderr, "\n") ;
+                    fprintf(stderr, "Echec de l'appel distant\n");
+                    clnt_perrno(stat);
+                    fprintf(stderr, "\n");
 					pthread_exit(NULL);
                 }
 				printf("%d\n",res);
@@ -118,7 +173,7 @@ int main(int argc, char ** argv)
 
 	if(argc < 3 || argc >= 12)
 	{
-		printf("To few argument\n");
+		printf("Too few argument\n");
 		return 0;
 	}
 	
