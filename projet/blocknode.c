@@ -180,7 +180,6 @@ int main(int argc, char ** argv)
 	
 	block_node * bn = (block_node *) malloc(sizeof(block_node));
 	bn->num = atoi(argv[1]);
-
 	
 
 	PROGNUM = bn->num;
@@ -194,6 +193,11 @@ int main(int argc, char ** argv)
 	for(i = argc; i < 10; i++)
 	{
 		bn->block_node_connect[i] = 0;
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		bn->b[i] = (block *) malloc(sizeof(block));
 	}
 
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
