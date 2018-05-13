@@ -18,9 +18,10 @@ int * hello(void)
     return &r;
 }
 
-int * create_block(void)
+int * create_block(block_node * bn)
 {
-	
+	printf("%d\n",bn->num);
+	return bn->num;
 }
 
 int * ask_for_blocks(void)
@@ -65,9 +66,9 @@ void *node(void *arg)
             case 0:
 				scanf("%d",&ask);
                 stat = callrpc("localhost",
-                   	ask,ask,ask,
+                   	1,ask,ask,
                     (xdrproc_t)xdr_void, (void *)0,
-                    (xdrproc_t)xdr_int, (char *)&res) ;
+                    (xdrproc_t)xdr_int, (int *)&res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
@@ -78,7 +79,25 @@ void *node(void *arg)
                 }
                 break;
             case 1:
-                stop = 1;
+				stat = callrpc("localhost",
+                   	2,ask,ask,
+                    (xdrproc_t)xdr_void, (block_node *)&bn,
+                    (xdrproc_t)xdr_int, (int *)&res) ;
+
+                if (stat != RPC_SUCCESS)
+                {
+                    fprintf(stderr, "Echec de l'appel distant\n") ;
+                    clnt_perrno(stat) ;
+                    fprintf(stderr, "\n") ;
+					pthread_exit(NULL);
+                }
+				printf("%d\n",res);
+                break;
+            case 2:
+			case 3:
+			case 4:
+				stop = 1;
+				pthread_exit(NULL);
                 break;
             default:
                 break;
@@ -124,6 +143,12 @@ int main(int argc, char ** argv)
     if(registerrpc(PROGNUM, VERSNUM, PROCNUM, hello, (xdrproc_t)xdr_void, 
 		(xdrproc_t)xdr_int) == -1){
         fprintf(stderr, "unable to register 'hello' !\n");
+        return EXIT_FAILURE;
+    }
+
+	if(registerrpc(PROGNUM+1, VERSNUM, PROCNUM, create_block, (xdrproc_t)xdr_void, 
+		(xdrproc_t)xdr_int) == -1){
+        fprintf(stderr, "unable to register 'create_block' !\n");
         return EXIT_FAILURE;
     }
 
