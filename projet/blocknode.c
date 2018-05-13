@@ -66,7 +66,7 @@ void *node(void *arg)
             case 0:
 				scanf("%d",&ask);
                 stat = callrpc("localhost",
-                   	1,ask,ask,
+                   	ask,ask,1,
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_char, (char *)&res) ;
 
@@ -80,7 +80,7 @@ void *node(void *arg)
                 break;
             case 1:
 				stat = callrpc("localhost",
-                   	2,ask,ask,
+                   	ask,ask,2,
                     (xdrproc_t)xdr_block_node, (char *)&bn,
                     (xdrproc_t)xdr_char, (char *)&res) ;
 
@@ -146,7 +146,7 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-	if(registerrpc(PROGNUM+1, VERSNUM, PROCNUM, create_block, (xdrproc_t)xdr_void, 
+	if(registerrpc(PROGNUM, VERSNUM, PROCNUM+1, create_block, (xdrproc_t)xdr_block_node, 
 		(xdrproc_t)xdr_int) == -1){
         fprintf(stderr, "unable to register 'create_block' !\n");
         return EXIT_FAILURE;
