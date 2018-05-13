@@ -26,6 +26,8 @@ block * malloc_block(void);
 
 block_node * malloc_block_node(void);
 
+bool_t xdr_request(XDR * xdrs, char * request);
+
 bool_t xdr_block(XDR *xdrs, block * block);
 
 bool_t xdr_block_node(XDR * xdrs, block_node * bn);

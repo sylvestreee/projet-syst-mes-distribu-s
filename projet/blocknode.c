@@ -46,10 +46,14 @@ void *node(void *arg)
 {
     printf("launching server\n");
 
+	block_node bn = (block_node) arg;
+	
     int stop = 0;
     int ask;
     enum clnt_stat stat ;
     static int res;
+
+	printf("%d\n",bn->num);
 
     while(stop != 1)
     {
@@ -69,6 +73,7 @@ void *node(void *arg)
                     fprintf(stderr, "Echec de l'appel distant\n") ;
                     clnt_perrno(stat) ;
                     fprintf(stderr, "\n") ;
+					pthread_exit(NULL);
                 }
                 break;
             case 1:
@@ -97,7 +102,7 @@ int main(int argc, char ** argv)
 		return 0;
 	}
 	
-	struct block_node bn;
+	block_node bn;
 	bn.num = atoi(argv[1]);
 
 	PROGNUM = bn.num;
@@ -110,7 +115,7 @@ int main(int argc, char ** argv)
 	}
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
-    if(pthread_create(&thread_client, NULL, node, NULL) == -1){
+    if(pthread_create(&thread_client, NULL, node, bn) == -1){
         perror("pthread_create");
         return EXIT_FAILURE;
     }
