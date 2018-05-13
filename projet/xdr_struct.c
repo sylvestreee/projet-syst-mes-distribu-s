@@ -11,9 +11,13 @@ bool_t xdr_request(XDR * xdrs, char * request)
 
 bool_t xdr_block(XDR *xdrs, block * block)
 {
-	return (xdr_int(xdrs, &block->depth) && 
-			xdr_int(xdrs, &block->creator) &&
-			xdr_vector(xdrs, &bn->requests, NB, sizeof(request), xdr_request));
+	if(!(xdr_int(xdrs, &block->depth)))
+		return (FALSE);
+	if(!(xdr_int(xdrs, &block->creator)))
+		return (FALSE);
+	if(!(xdr_vector(xdrs, &block->requests, NB, sizeof(request), xdr_request)))
+		return (FALSE);
+	return (TRUE);
 }
 
 bool_t xdr_block_node(XDR * xdrs, block_node * bn)

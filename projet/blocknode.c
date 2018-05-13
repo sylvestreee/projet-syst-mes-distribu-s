@@ -197,7 +197,9 @@ int main(int argc, char ** argv)
 
 	for(i = 0; i < 10; i++)
 	{
-		bn->b[i] = (block *) malloc(sizeof(block));
+		bn->b[i] = (block *)malloc(sizeof(block));
+		bn->b[i]->depth = -1;
+		bn->b[i]->creator = -1;
 	}
 
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);

@@ -11,7 +11,7 @@ struct block
 	int depth;
 	int creator;
 	// hash
-	//request requests[NB];
+	request requests[NB];
 };
 
 typedef struct block block;
@@ -26,7 +26,7 @@ typedef struct participant_node participant_node;
 struct block_node {
 	int num;
 	int block_node_connect[NB];
-	block b[NB]; // blockchain
+	block * b[NB]; // blockchain
 	//participant_node p[NB]; // participant_node which are connected to the blocknode
 	request requests[NB];
 };

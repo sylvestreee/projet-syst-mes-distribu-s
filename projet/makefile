@@ -2,10 +2,10 @@
 all : node
 #----------------------------------------------
 .c.o :
-	gcc -I/usr/include/win32 -Wall -c $<
+	gcc -g -I/usr/include/win32 -Wall -c $<
 #----------------------------------------------
 node : blocknode.o xdr_struct.o
-	gcc -o node xdr_struct.o blocknode.o -lrpcsvc -lnsl -pthread
+	gcc -g -o node xdr_struct.o blocknode.o -lrpcsvc -lnsl -pthread
 
 #----------------------------------------------
 clean :

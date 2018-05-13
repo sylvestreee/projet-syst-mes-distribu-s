@@ -31,7 +31,7 @@ int *hello(void)
 int *create_block(block_node *bn)
 {
 	printf("create block %d\n",bn->num);
-	return &bn->num;
+	return (int *)1;
 	/*
     int i = 0, length = array(bn->b);
     block *bl = (block *) malloc(sizeof(block));
@@ -148,9 +148,9 @@ void *node(void *arg)
                 }
                 break;
             case 2:
-		break;
-		case 3:
-		break;
+				break;
+			case 3:
+				break;
 			case 4:
 				stop = 1;
 				pthread_exit(NULL);
@@ -180,6 +180,7 @@ int main(int argc, char ** argv)
 	
 	block_node * bn = (block_node *) malloc(sizeof(block_node));
 	bn->num = atoi(argv[1]);
+	
 
 	PROGNUM = bn->num;
 	VERSNUM = bn->num;
@@ -189,6 +190,16 @@ int main(int argc, char ** argv)
 	{
 		bn->block_node_connect[i-2] = atoi(argv[i]);
 	}
+	for(i = argc; i < 10; i++)
+	{
+		bn->block_node_connect[i] = 0;
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		bn->b[i] = (block *)malloc(sizeof(block));
+	}
+
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
     if(pthread_create(&thread_client, NULL, node, (void *)bn) == -1){
