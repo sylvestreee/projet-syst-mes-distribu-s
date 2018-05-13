@@ -18,9 +18,10 @@ int * hello(void)
     return &r;
 }
 
-int * create_block(void)
+int * create_block(block_node * bn)
 {
-	
+	printf("%d\n",bn->num);
+	return &bn->num;
 }
 
 int * ask_for_blocks(void)
@@ -65,9 +66,9 @@ void *node(void *arg)
             case 0:
 				scanf("%d",&ask);
                 stat = callrpc("localhost",
-                   	ask,ask,ask,
+                   	ask,ask,1,
                     (xdrproc_t)xdr_void, (void *)0,
-                    (xdrproc_t)xdr_int, (char *)&res) ;
+                    (xdrproc_t)xdr_char, (char *)&res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
@@ -78,7 +79,25 @@ void *node(void *arg)
                 }
                 break;
             case 1:
-                stop = 1;
+				stat = callrpc("localhost",
+                   	ask,ask,2,
+                    (xdrproc_t)xdr_block_node, (char *)&bn,
+                    (xdrproc_t)xdr_char, (char *)&res) ;
+
+                if (stat != RPC_SUCCESS)
+                {
+                    fprintf(stderr, "Echec de l'appel distant\n") ;
+                    clnt_perrno(stat) ;
+                    fprintf(stderr, "\n") ;
+					pthread_exit(NULL);
+                }
+				printf("%d\n",res);
+                break;
+            case 2:
+			case 3:
+			case 4:
+				stop = 1;
+				pthread_exit(NULL);
                 break;
             default:
                 break;
@@ -103,7 +122,7 @@ int main(int argc, char ** argv)
 		return 0;
 	}
 	
-	block_node * bn = malloc_block_node();
+	block_node * bn = (block_node *) malloc(sizeof(block_node));
 	bn->num = atoi(argv[1]);
 
 	PROGNUM = bn->num;
@@ -122,8 +141,15 @@ int main(int argc, char ** argv)
     }
 
     if(registerrpc(PROGNUM, VERSNUM, PROCNUM, hello, (xdrproc_t)xdr_void, 
-		(xdrproc_t)xdr_int) == -1){
+		(xdrproc_t)xdr_char) == -1){
         fprintf(stderr, "unable to register 'hello' !\n");
+        return EXIT_FAILURE;
+    }
+
+	if(registerrpc(PROGNUM, VERSNUM, PROCNUM+1, create_block, 	
+		xdr_block_node, 
+		(xdrproc_t)xdr_char) == -1){
+        fprintf(stderr, "unable to register 'create_block' !\n");
         return EXIT_FAILURE;
     }
 
