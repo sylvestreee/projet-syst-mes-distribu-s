@@ -181,6 +181,8 @@ int main(int argc, char ** argv)
 	block_node * bn = (block_node *) malloc(sizeof(block_node));
 	bn->num = atoi(argv[1]);
 
+	
+
 	PROGNUM = bn->num;
 	VERSNUM = bn->num;
 	PROCNUM = bn->num;
@@ -189,6 +191,11 @@ int main(int argc, char ** argv)
 	{
 		bn->block_node_connect[i-2] = atoi(argv[i]);
 	}
+	for(i = argc; i < 10; i++)
+	{
+		bn->block_node_connect[i] = 0;
+	}
+
 	printf("%d, %d, %d\n",PROGNUM,VERSNUM,PROCNUM);
     
     if(pthread_create(&thread_client, NULL, node, (void *)bn) == -1){
