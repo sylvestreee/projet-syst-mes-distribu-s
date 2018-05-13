@@ -20,7 +20,7 @@ struct block_node {
 	request requests[NB];
 };
 
-typedef struct block_node block_node;
+typedef struct node_block node_block;
 
 block * malloc_block(void);
 

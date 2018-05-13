@@ -1,6 +1,6 @@
 #include "include.h"
 
-block * malloc_block(void)
+/*block * malloc_block(void)
 {
 	block * b;
 	b = (block *) malloc(sizeof(block));
@@ -13,7 +13,7 @@ block_node * malloc_block_node(void)
 	bn = (block_node *) malloc(sizeof(block_node));
 	return bn;
 }
-/*
+
 void xdr_freep(void *p)
 {
   fprintf(stdout, "Zone désallouée : %x\n", (unsigned)p);

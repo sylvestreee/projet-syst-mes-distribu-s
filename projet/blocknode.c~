@@ -103,7 +103,7 @@ int main(int argc, char ** argv)
 		return 0;
 	}
 	
-	block_node * bn = (block_node *) malloc(sizeof(block_node));
+	block_node * bn = malloc_block_node();
 	bn->num = atoi(argv[1]);
 
 	PROGNUM = bn->num;
