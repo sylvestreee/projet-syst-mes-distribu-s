@@ -81,7 +81,7 @@ void *node(void *arg)
             case 1:
 				stat = callrpc("localhost",
                    	2,ask,ask,
-                    (xdrproc_t)xdr_void, (block_node *)&bn,
+                    (xdrproc_t)xdr_block_node, (block_node *)&bn,
                     (xdrproc_t)xdr_int, (int *)&res) ;
 
                 if (stat != RPC_SUCCESS)
