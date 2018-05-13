@@ -21,7 +21,7 @@ int * hello(void)
 int * create_block(block_node * bn)
 {
 	printf("%d\n",bn->num);
-	return bn->num;
+	return 1;
 }
 
 int * ask_for_blocks(void)
@@ -68,7 +68,7 @@ void *node(void *arg)
                 stat = callrpc("localhost",
                    	1,ask,ask,
                     (xdrproc_t)xdr_void, (void *)0,
-                    (xdrproc_t)xdr_int, (int *)&res) ;
+                    (xdrproc_t)xdr_char, (int *)&res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
@@ -82,7 +82,7 @@ void *node(void *arg)
 				stat = callrpc("localhost",
                    	2,ask,ask,
                     (xdrproc_t)xdr_block_node, (block_node *)&bn,
-                    (xdrproc_t)xdr_int, (int *)&res) ;
+                    (xdrproc_t)xdr_char, (int *)&res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
