@@ -159,7 +159,7 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 	return TRUE;
 }
 
-bool_t xdr_transmission(XDR *xdrs, transmission *objp)
+bool_t xdr_transmission(XDR *xdrs, request *objp)
 {
 	if (!xdr_pointer (xdrs, (char **)&objp->bn, sizeof (block_node), (xdrproc_t) xdr_block_node))
 		 return FALSE;

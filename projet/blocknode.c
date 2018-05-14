@@ -9,6 +9,8 @@
 
 #include "include.h"
 
+block_node * block_n = NULL;
+
 /* on utilise les thread pour lancer à la fois un serveur et un client pour un seul noeud*/
 
 void printf_requests(request r)
@@ -48,14 +50,6 @@ int array(block * b)
         i++;
     }
     return i;
-}
-
-int *hello(void)
-{
-    static int r = 0;
-    printf("Hello world\n");
-    fflush(stdout);
-    return &r;
 }
 
 block initialize_block(block bl)
@@ -126,8 +120,8 @@ block_node * create_block(block_node * block_n)
 	}
 
 	// transmit_blockchain_points function
-	printf("create block in %d\n", bn->num);
-	printf_block_node(bn);
+	printf("create block in block_node %d and block %d\n", bn->num, length);
+	//printf_block_node(bn);
 	fflush(stdout);
 	return bn;	
 }
@@ -149,25 +143,37 @@ int block_number(block_node *bn)
     return i;
 }
 
+// renvoie le nombre de requêtes en attente
+int request_number(block_node *bn)
+{
+    int i = 0;
+    while(bn->requests[i].sender != -1)
+    {
+        i++;
+    }
+    return i;
+}
+
 /* quand on reçoit une transmission d'un bloc :
  * - soit le noeud bloc n'a pas atteint la limite de bloc donc on ajoute le bloc (0)
- * - soit le noeud bloc a pas atteint la limite de bloc donc on n'ajoute pas le bloc (-1)
+ * - soit le noeud bloc a atteint la limite de bloc donc on n'ajoute pas le bloc (-1)
  */
-int *transmit_blocks(block bl)
+int *transmit_blocks(transmission * trans)
 {
-    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    block_node *bn = block_n; // shouldn't exist
     static int t = 0, f = -1;
-    int i = 0, length = block_number(bn);
+    int i = 0, j=0, length = block_number(bn);
+    block bl = trans->bn->b[trans->q];
     if(length < 10)
     {
         bn->b[length] = bl;
-        while(bl->requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
+        while(bl.requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
         {
             for(j = 0; j < request_number(bn); j++) // parcours des requêtes en attente du noeud bloc
             {
-                if(bl->requests[i].sender == bn->requests[j].sender &&
-                   bl->requests[i].entitle == bn->requests[j].entitle &&
-                   bl->requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
+                if(bl.requests[i].sender == bn->requests[j].sender &&
+                   bl.requests[i].entitle == bn->requests[j].entitle &&
+                   bl.requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
                 {
                     bn->requests[j].sender = -1;
                     bn->requests[j].entitle = -1;
@@ -182,18 +188,9 @@ int *transmit_blocks(block bl)
     {
         return &f;
     }
+    printf_block_node(bn);
+    block_n = bn;
     return &t;
-}
-
-// renvoie le nombre de requêtes en attente
-int request_number(block_node *bn)
-{
-    int i = 0;
-    while(bn->requests[i].sender != -1)
-    {
-        i++;
-    }
-    return i;
 }
 
 /* quand on reçoit une requête d'un noeud bloc voisin :
@@ -265,63 +262,93 @@ void *node(void *arg)
 
     block_node * bn = (block_node *) arg;
 	
-    int stop = 0;
-    int ask;
-    enum clnt_stat stat;
-    static int res;
-	block_node * bn_res = (block_node*) malloc(sizeof(block_node));
+	int i, b_neigboorh, ask;
+	enum clnt_stat stat;
+	static int res;	
+	static block_node * bn_res;
+	static block b;
+	static transmission * t;
+	bn_res = (block_node*) malloc(sizeof(block_node));
 	bn_res = bn;
-	printf_block_node(bn);
+	t = (transmission *) malloc(sizeof(transmission));
 
-    while(stop != 1)
+    while(1)
     {
         printf(">");
         scanf("%d",&ask);
         switch(ask)
         {
             case 0:
-		scanf("%d",&ask);
-                stat = callrpc("localhost",ask,ask,1,
-                    (xdrproc_t)xdr_void, (void *)0,
-                    (xdrproc_t)xdr_int, (char *)&res);
+		stat = callrpc("localhost",bn->num,bn->num,1,
+                    	(xdrproc_t)xdr_block_node,(char *)bn,
+                    	(xdrproc_t)xdr_block_node,(char *)bn_res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
-                    fprintf(stderr, "Echec de l'appel distant\n");
-                    clnt_perrno(stat);
-                    fprintf(stderr, "\n");
-					pthread_exit(NULL);
-                }
-                break;
-            case 1:
-		stat = callrpc("localhost",bn->num,bn->num,2,
-                    (xdrproc_t)xdr_block_node,(char *)bn,
-                    (xdrproc_t)xdr_block_node,(char *)bn_res) ;
-
-                if (stat != RPC_SUCCESS)
-                {
-                    fprintf(stderr, "Echec de l'appel distant\n");
-                    clnt_perrno(stat);
-                    fprintf(stderr, "\n");
-					pthread_exit(NULL);
+                    	fprintf(stderr, "Echec de l'appel distant\n");
+                    	clnt_perrno(stat);
+			fprintf(stderr, "\n");
+			pthread_exit(NULL);
                 }
 
-		printf("-------------BLOCK_NODE BN_RES----------------\n");
+		/*printf("-------------BLOCK_NODE BN_RES----------------\n");
 		printf_block_node(bn_res);
-		bn = bn_res;
 		
 		printf("-------------BLOCK_NODE BN----------------\n");
-		printf_block_node(bn);
+		printf_block_node(bn);*/
+
+		bn = bn_res;
+		block_n = bn;
                 break;
-            case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				stop = 1;
-				pthread_exit(NULL);
+            case 1:
+		b_neigboorh = -1;
+		while(b_neigboorh == -1 || b_neigboorh == 0)
+		{
+			printf("Choose neigboorh block : ");
+			scanf("%d",&ask);		
+			for(i = 0; i < 10; i++)
+			{
+				if(ask == bn->block_node_connect[i])
+					b_neigboorh = ask;
+			}
+		}
+
+		printf("Transmit block : choose block between 0 and 9: ");
+		scanf("%d",&ask);
+		while(ask < 0 || ask > 10)
+		{
+			printf("choose block between 0 and 9 : ");
+			scanf("%d",&ask);
+		}
+		
+		b = bn->b[ask];
+		printf_block(b);
+
+		t->bn = bn;
+		t->q = ask;
+		stat = callrpc	("localhost",b_neigboorh,b_neigboorh,2,
+                    (xdrproc_t)xdr_transmission,(char *)t,
+                    (xdrproc_t)xdr_int,(char *)&res) ;
+		
+		if (stat != RPC_SUCCESS)
+                {
+                    	fprintf(stderr, "Echec de l'appel distant\n");
+                    	clnt_perrno(stat);
+                    	fprintf(stderr, "\n");
+			pthread_exit(NULL);
+                }
+		if(res == 0)
+			printf("Transmission block number %d to block_node %d worked\n",ask,b_neigboorh);
+		else
+			printf("Transmission block number %d to block_node %d not worked\n",ask,b_neigboorh);
+		break;
+	case 3:
+		break;
+	case 4:
+		pthread_exit(NULL);
                 break;
             default:
+		printf_block_node(block_n);
                 break;
         }
         printf("\n");
@@ -345,52 +372,54 @@ int main(int argc, char ** argv)
 	}
 	
 	//Initialisation block_node
-	block_node * bn = (block_node *) malloc(sizeof(block_node));
-	bn->num = atoi(argv[1]);
+	block_n = (block_node *) malloc(sizeof(block_node));
+	block_n->num = atoi(argv[1]);
 	
-	PROGNUM = bn->num;
-	VERSNUM = bn->num;
+	PROGNUM = block_n->num;
+	VERSNUM = block_n->num;
 
 	for(i = 2; i < argc; i++)
 	{
-		bn->block_node_connect[i-2] = atoi(argv[i]);
+		block_n->block_node_connect[i-2] = atoi(argv[i]);
 	}
 
 	for(i = 0; i<10; i++)
 	{
-		bn->b[i] = bl;
-		bn->requests[i].sender = -1;
-		bn->requests[i].entitle = -1;
-		bn->requests[i].receiver = -1;
+		block_n->b[i] = bl;
+		block_n->requests[i].sender = -1;
+		block_n->requests[i].entitle = -1;
+		block_n->requests[i].receiver = -1;
 	}
 
     
-    if(pthread_create(&thread_client, NULL, node, (void *)bn) == -1){
-        perror("pthread_create");
-        return EXIT_FAILURE;
-    }
+	if(pthread_create(&thread_client, NULL, node, (void *)block_n) == -1)
+	{
+		perror("pthread_create");
+		return EXIT_FAILURE;
+	}
 
-    if(registerrpc(PROGNUM, VERSNUM, 1, hello, (xdrproc_t)xdr_void, 
-		(xdrproc_t)xdr_char) == -1){
-        fprintf(stderr, "unable to register 'hello' !\n");
-        return EXIT_FAILURE;
-    }
-
-	if(registerrpc(PROGNUM, VERSNUM, 2, create_block, 	
+	if(registerrpc(PROGNUM, VERSNUM, 1, create_block, 	
 		(xdrproc_t)xdr_block_node, 
-		(xdrproc_t)xdr_block_node) == -1){
-        fprintf(stderr, "unable to register 'create_block' !\n");
-        return EXIT_FAILURE;
-    }
+		(xdrproc_t)xdr_block_node) == -1)
+	{
+	        fprintf(stderr, "unable to register 'create_block' !\n");
+	        return EXIT_FAILURE;
+	}
+	if(registerrpc(PROGNUM,VERSNUM, 2, transmit_blocks,
+		(xdrproc_t)xdr_transmission, (xdrproc_t)xdr_int) == -1)
+	{
+		fprintf(stderr, "unable to register 'transmit_block' !\n");
+	        return EXIT_FAILURE;
+	}
 
-    printf("thread launched\n");
+	printf("thread launched\n");
+	svc_run();
 
-    svc_run();
+	if(pthread_join(thread_client,NULL)==-1)
+	{
+		perror("pthread_join");
+	        return EXIT_FAILURE;
+	}
 
-    if(pthread_join(thread_client,NULL)==-1){
-        perror("pthread_join");
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+    	return EXIT_SUCCESS;
 }
