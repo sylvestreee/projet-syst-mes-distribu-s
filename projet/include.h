@@ -9,7 +9,7 @@ extern "C" {
 
 struct request {
 	int sender;
-	char * entitle;
+	int entitle;
 	int receiver;
 };
 

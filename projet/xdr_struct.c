@@ -3,13 +3,10 @@
 bool_t
 xdr_request (XDR *xdrs, request *objp)
 {
-	register int32_t *buf;
-
-	int i;
 	 if (!xdr_int (xdrs, &objp->sender))
 		 return FALSE;
-	  if (!xdr_pointer (xdrs, (char **)&objp->entitle, sizeof (char), (xdrproc_t) xdr_char))
-		 return FALSE;
+	 if (!xdr_int (xdrs, &objp->entitle))
+		return FALSE;
 	 if (!xdr_int (xdrs, &objp->receiver))
 		 return FALSE;
 	return TRUE;
@@ -18,9 +15,6 @@ xdr_request (XDR *xdrs, request *objp)
 bool_t
 xdr_block (XDR *xdrs, block *objp)
 {
-	register int32_t *buf;
-
-	int i;
 	 if (!xdr_int (xdrs, &objp->depth))
 		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->creator))
@@ -118,9 +112,6 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 if (!xdr_vector (xdrs, (char *)objp->b, 10,
 			sizeof (block), (xdrproc_t) xdr_block))
 			 return FALSE;
-		 if (!xdr_vector (xdrs, (char *)objp->p, 10,
-			sizeof (participant_node), (xdrproc_t) xdr_participant_node))
-			 return FALSE;
 		 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 			sizeof (request), (xdrproc_t) xdr_request))
 			 return FALSE;
@@ -148,9 +139,6 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 if (!xdr_vector (xdrs, (char *)objp->b, 10,
 			sizeof (block), (xdrproc_t) xdr_block))
 			 return FALSE;
-		 if (!xdr_vector (xdrs, (char *)objp->p, 10,
-			sizeof (participant_node), (xdrproc_t) xdr_participant_node))
-			 return FALSE;
 		 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 			sizeof (request), (xdrproc_t) xdr_request))
 			 return FALSE;
@@ -164,9 +152,6 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 return FALSE;
 	 if (!xdr_vector (xdrs, (char *)objp->b, 10,
 		sizeof (block), (xdrproc_t) xdr_block))
-		 return FALSE;
-	 if (!xdr_vector (xdrs, (char *)objp->p, 10,
-		sizeof (participant_node), (xdrproc_t) xdr_participant_node))
 		 return FALSE;
 	 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 		sizeof (request), (xdrproc_t) xdr_request))

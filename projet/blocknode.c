@@ -11,6 +11,35 @@
 
 /* on utilise les thread pour lancer à la fois un serveur et un client pour un seul noeud*/
 
+void printf_requests(request r)
+{
+	printf("Sender : %d, Entitle : %d, Receiver : %d\n",
+		r.sender,r.entitle,r.receiver);
+}
+
+void printf_block(block b)
+{
+	int i;
+	printf("Depth : %d, Creator : %d\n",
+		b.depth,b.creator);
+	for(i = 0; i < 10; i++)
+		printf_requests(b.requests[i]);
+}
+
+void printf_block_node(block_node * bn)
+{	
+	int i = 0;
+	printf("Numero : %d\n",bn->num);
+	printf("Block node connect :");
+	for(i = 0; i < 10; i++)
+		printf("-%d",bn->block_node_connect[i]);
+	printf("\n");
+	for(i = 0; i < 10; i++)
+		printf_block(bn->b[i]);
+	for(i = 0; i < 10; i++)
+		printf_requests(bn->requests[i]);
+}
+
 int array(block * b)
 {
     int i = 0;
@@ -37,19 +66,25 @@ block initialize_block(block bl)
     for(i = 0; i < 10; i++)
     {
         bl.requests[i].sender = -1;
-        bl.requests[i].entitle = "nothing";
+        bl.requests[i].entitle = -1;
         bl.requests[i].receiver = -1;
     }
     return bl;
 }
-
-int *create_block(block_node *bn)
+block_node * create_block(block_node * block_n)
 {	
-	static int r = 0;
-	printf("create block %d\n", bn->b[0].depth);
-	fflush(stdout);
-	int i = 0, length = array(bn->b);
-	block bl;
+	static block_node * bn = NULL;
+	if(bn != NULL)
+	{
+		free(bn);
+	}
+	
+	bn = (block_node *)malloc(sizeof(block_node));
+
+	bn = block_n;
+	//printf("create block %d\n", bn->num);
+	int i = 0, length = array(bn->b);	
+	block bl = initialize_block(bl);
     
 	// empty blockchain
 	if(bn->b[0].creator == -1)
@@ -60,17 +95,17 @@ int *create_block(block_node *bn)
 		while(bn->requests[i].sender != -1) // remplir le tableau du bloc / vider le tableau du noeud
 		{
 			bl.requests[i].sender = bn->requests[i].sender;
-            bl.requests[i].entitle = bn->requests[i].entitle;
-            bl.requests[i].receiver = bn->requests[i].receiver;
-            bn->requests[i].sender = -1;
-            bn->requests[i].entitle = "nothing";
-            bn->requests[i].receiver = -1;
+			bl.requests[i].entitle = bn->requests[i].entitle;
+			bl.requests[i].receiver = bn->requests[i].receiver;
+			bn->requests[i].sender = -1;
+			bn->requests[i].entitle = -1;
+			bn->requests[i].receiver = -1;
 			i++;
 		}
 		bn->b[0] = bl;
 	}
 	// blockchain's not full
-	if(length < 10)
+	if(length > 1 && length < 10)
 	{
 		bl.depth = length;
 		bl.creator = bn->num;
@@ -81,7 +116,7 @@ int *create_block(block_node *bn)
             bl.requests[i].entitle = bn->requests[i].entitle;
             bl.requests[i].receiver = bn->requests[i].receiver;
             bn->requests[i].sender = -1;
-            bn->requests[i].entitle = "nothing";
+            bn->requests[i].entitle = -1;
             bn->requests[i].receiver = -1;
 			i++;
 		}
@@ -91,13 +126,14 @@ int *create_block(block_node *bn)
 	// blockchain's full
 	else if(length == 10)
 	{
-		r = -1;
-		return &r;
+		return bn;
 	}
 
 	// transmit_blockchain_points function
 	printf("create block in %d\n", bn->num);
-	return &r;	
+	printf_block_node(bn);
+	fflush(stdout);
+	return bn;	
 }
 
 /*
@@ -162,14 +198,12 @@ void *node(void *arg)
     block_node * bn = (block_node *) arg;
 	
     int stop = 0;
-    int ask,i;
+    int ask;
     enum clnt_stat stat;
     static int res;
-	for(i = 0; i < 10; i++)
-	{
-		printf("%d\n",bn->b[i].depth);	
-	} 
-	printf("%d\n",bn->num);
+	block_node * bn_res = (block_node*) malloc(sizeof(block_node));
+	bn_res = bn;
+	printf_block_node(bn);
 
     while(stop != 1)
     {
@@ -178,9 +212,8 @@ void *node(void *arg)
         switch(ask)
         {
             case 0:
-				scanf("%d",&ask);
-                stat = callrpc("localhost",
-                   	ask,ask,1,
+		scanf("%d",&ask);
+                stat = callrpc("localhost",ask,ask,1,
                     (xdrproc_t)xdr_void, (void *)0,
                     (xdrproc_t)xdr_int, (char *)&res);
 
@@ -193,10 +226,9 @@ void *node(void *arg)
                 }
                 break;
             case 1:
-				stat = callrpc("localhost",
-                   	ask,ask,2,
+		stat = callrpc("localhost",bn->num,bn->num,2,
                     (xdrproc_t)xdr_block_node,(char *)bn,
-                    (xdrproc_t)xdr_char, (char *)&res) ;
+                    (xdrproc_t)xdr_block_node,(char *)bn_res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
@@ -205,6 +237,13 @@ void *node(void *arg)
                     fprintf(stderr, "\n");
 					pthread_exit(NULL);
                 }
+
+		
+		printf("-------------BLOCK_NODE BN----------------\n");
+		//printf_block_node(bn);
+		printf("-------------BLOCK_NODE BN_RES----------------\n");
+		printf_block_node(bn_res);
+		bn = bn_res;
                 break;
             case 2:
 				break;
@@ -229,7 +268,7 @@ int main(int argc, char ** argv)
 	int i = 0;
 	int PROGNUM;
 	int VERSNUM;
-    block bl = initialize_block(bl);
+    	block bl = initialize_block(bl);
 
 	if(argc < 3 || argc >= 12)
 	{
@@ -237,6 +276,7 @@ int main(int argc, char ** argv)
 		return 0;
 	}
 	
+	//Initialisation block_node
 	block_node * bn = (block_node *) malloc(sizeof(block_node));
 	bn->num = atoi(argv[1]);
 	
@@ -251,9 +291,11 @@ int main(int argc, char ** argv)
 	for(i = 0; i<10; i++)
 	{
 		bn->b[i] = bl;
-		bn->b[i].depth = -1;
-		bn->b[i].creator = -1;
+		bn->requests[i].sender = -1;
+		bn->requests[i].entitle = -1;
+		bn->requests[i].receiver = -1;
 	}
+
     
     if(pthread_create(&thread_client, NULL, node, (void *)bn) == -1){
         perror("pthread_create");
@@ -268,7 +310,7 @@ int main(int argc, char ** argv)
 
 	if(registerrpc(PROGNUM, VERSNUM, 2, create_block, 	
 		(xdrproc_t)xdr_block_node, 
-		(xdrproc_t)xdr_char) == -1){
+		(xdrproc_t)xdr_block_node) == -1){
         fprintf(stderr, "unable to register 'create_block' !\n");
         return EXIT_FAILURE;
     }
