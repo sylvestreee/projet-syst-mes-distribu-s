@@ -102,9 +102,6 @@ int main(int argc, char ** argv)
 	{
 		participant_n->block_node_connect[i] = atoi(argv[i]);
 	}
-	
-	PROGNUM = participant_n->num;
-	VERSNUM = participant_n->num;
 
 	if(pthread_create(&thread_client, NULL, node_participant, NULL) == -1)
 	{

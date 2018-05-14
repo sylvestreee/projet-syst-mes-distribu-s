@@ -25,6 +25,7 @@ struct block {
 typedef struct block block;
 
 struct participant_node {
+	int num;
 	int value;
 	int block_node_connect[10];
 };

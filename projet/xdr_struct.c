@@ -33,14 +33,17 @@ xdr_participant_node (XDR *xdrs, participant_node *objp)
 	int i;
 
 	if (xdrs->x_op == XDR_ENCODE) {
-		buf = XDR_INLINE (xdrs, (1 +  10 )* BYTES_PER_XDR_UNIT);
+		buf = XDR_INLINE (xdrs, (2 +  10 )* BYTES_PER_XDR_UNIT);
 		if (buf == NULL) {
+			 if (!xdr_int (xdrs, &objp->num))
+				 return FALSE;
 			 if (!xdr_int (xdrs, &objp->value))
 				 return FALSE;
 			 if (!xdr_vector (xdrs, (char *)objp->block_node_connect, 10,
 				sizeof (int), (xdrproc_t) xdr_int))
 				 return FALSE;
 		} else {
+			IXDR_PUT_LONG(buf, objp->num);
 			IXDR_PUT_LONG(buf, objp->value);
 			{
 				register int *genp;
@@ -53,14 +56,17 @@ xdr_participant_node (XDR *xdrs, participant_node *objp)
 		}
 		return TRUE;
 	} else if (xdrs->x_op == XDR_DECODE) {
-		buf = XDR_INLINE (xdrs, (1 +  10 )* BYTES_PER_XDR_UNIT);
+		buf = XDR_INLINE (xdrs, (2 +  10 )* BYTES_PER_XDR_UNIT);
 		if (buf == NULL) {
+			 if (!xdr_int (xdrs, &objp->num))
+				 return FALSE;
 			 if (!xdr_int (xdrs, &objp->value))
 				 return FALSE;
 			 if (!xdr_vector (xdrs, (char *)objp->block_node_connect, 10,
 				sizeof (int), (xdrproc_t) xdr_int))
 				 return FALSE;
 		} else {
+			objp->num = IXDR_GET_LONG(buf);
 			objp->value = IXDR_GET_LONG(buf);
 			{
 				register int *genp;
@@ -74,6 +80,8 @@ xdr_participant_node (XDR *xdrs, participant_node *objp)
 	 return TRUE;
 	}
 
+	 if (!xdr_int (xdrs, &objp->num))
+		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->value))
 		 return FALSE;
 	 if (!xdr_vector (xdrs, (char *)objp->block_node_connect, 10,
@@ -81,7 +89,6 @@ xdr_participant_node (XDR *xdrs, participant_node *objp)
 		 return FALSE;
 	return TRUE;
 }
-
 bool_t
 xdr_block_node (XDR *xdrs, block_node *objp)
 {

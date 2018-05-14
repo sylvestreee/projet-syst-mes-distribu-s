@@ -311,10 +311,10 @@ int *ask_for_inscription(int num)
 }
 
 // renvoie la liste des participants
-block *get_participant()
+/*block *get_participant()
 {
     return block_n->pn;
-}
+}*/
 
 void *node(void *arg)
 {
@@ -326,7 +326,6 @@ void *node(void *arg)
 	enum clnt_stat stat;
 	static int res;	
 	static block_node * bn_res;
-	static block b;
 	static transmission * t;
 	bn_res = (block_node*) malloc(sizeof(block_node));
 	bn_res = bn;
@@ -399,9 +398,9 @@ void *node(void *arg)
 		else
 			printf("Transmission block number %d to block_node %d not worked\n",ask,b_neigboorh);
 		break;
-	case 3:
+	case 2:
 		break;
-	case 4:
+	case 3:
 		pthread_exit(NULL);
                 break;
             default:
@@ -424,7 +423,7 @@ int main(int argc, char ** argv)
 
 	if(argc < 3 || argc >= 12)
 	{
-		printf("Too few argument\n");
+		printf("Too few/many argument\n");
 		return 0;
 	}
 	
@@ -471,19 +470,19 @@ int main(int argc, char ** argv)
 	if(registerrpc(PROGNUM,VERSNUM, 3, transmit_requests,
 		(xdrproc_t)xdr_transmission, (xdrproc_t)xdr_int) == -1)
 	{
-		fprintf(stderr, "unable to register 'transmit_block' !\n");
+		fprintf(stderr, "unable to register 'transmit_requests' !\n");
 	        return EXIT_FAILURE;
 	}
 	if(registerrpc(PROGNUM,VERSNUM, 4, ask_for_inscription,
 		(xdrproc_t)xdr_int, (xdrproc_t)xdr_int) == -1)
 	{
-		fprintf(stderr, "unable to register 'transmit_block' !\n");
+		fprintf(stderr, "unable to register 'ask_for_inscription' !\n");
 	        return EXIT_FAILURE;
 	}
 	if(registerrpc(PROGNUM,VERSNUM, 5, ask_for_blocks,
 		(xdrproc_t)xdr_int, (xdrproc_t)xdr_int) == -1)
 	{
-		fprintf(stderr, "unable to register 'transmit_block' !\n");
+		fprintf(stderr, "unable to register 'ask_for_blocks' !\n");
 	        return EXIT_FAILURE;
 	}
 	printf("thread launched\n");
