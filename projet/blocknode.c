@@ -42,16 +42,6 @@ void printf_block_node(block_node * bn)
 		printf_requests(bn->requests[i]);
 }
 
-int array(block * b)
-{
-    int i = 0;
-    while(b[i].creator != -1)
-    {
-        i++;
-    }
-    return i;
-}
-
 block initialize_block(block bl)
 {
     int i;
@@ -88,6 +78,18 @@ int block_number(block_node *bn)
     return i;
 }
 
+// renvoie le nombre de participants inscrits
+int participant_number(block_node *bn)
+{
+    int i = 0;
+    while(bn->pn[i] != -1) // parcours de la blockchain
+    { 
+        i++;
+    }
+    return i;
+}
+
+
 block_node * create_block(block_node * block_n)
 {	
 	enum clnt_stat stat;
@@ -98,7 +100,7 @@ block_node * create_block(block_node * block_n)
 
 	bn = block_n;
 	//printf("create block %d\n", bn->num);
-	int i = 0, length = array(bn->b);	
+	int i = 0, length = block_number(bn), length2;	
 	block bl = initialize_block(bl);
     
 	// empty blockchain
@@ -109,12 +111,17 @@ block_node * create_block(block_node * block_n)
 		// hash
 		while(bn->requests[i].sender != -1) // remplir le tableau du bloc / vider le tableau du noeud
 		{
+			length2 = participant_number(bn);
 			bl.requests[i].sender = bn->requests[i].sender;
 			bl.requests[i].entitle = bn->requests[i].entitle;
 			bl.requests[i].receiver = bn->requests[i].receiver;
 			bn->requests[i].sender = -1;
 			bn->requests[i].entitle = -1;
 			bn->requests[i].receiver = -1;
+			if(bn->requests[i].entitle == -1)
+			{
+				bn->pn[length2] = bn->requests[i].sender;
+			}
 			i++;
 		}
 		bn->b[0] = bl;
@@ -127,12 +134,17 @@ block_node * create_block(block_node * block_n)
 		// hash
 		while(bn->requests[i].sender != -1)
 		{
+			length2 = participant_number(bn);
 			bl.requests[i].sender = bn->requests[i].sender;
             bl.requests[i].entitle = bn->requests[i].entitle;
             bl.requests[i].receiver = bn->requests[i].receiver;
             bn->requests[i].sender = -1;
             bn->requests[i].entitle = -1;
             bn->requests[i].receiver = -1;
+            if(bn->requests[i].entitle == -1)
+			{
+				bn->pn[length2] = bn->requests[i].sender;
+			}
 			i++;
 		}
 		bn->b[length] = bl;
@@ -212,7 +224,7 @@ int *transmit_blocks(transmission * trans)
 {
     block_node *bn = block_n;
     static int t = 0, f = -1;
-    int i = 0, j = 0, length = block_number(bn);
+    int i = 0, j = 0, length = block_number(bn), length2;
     block bl = trans->bn->b[trans->q];
     if(length < 10)
     {
@@ -265,26 +277,6 @@ int *transmit_requests(transmission *trans)
         return &f;
     }
     return &t;
-}
-
-// renvoie le nombre de participants inscrits
-int participant_number(block_node *bn)
-{
-    int i = 0, j = 0, n;
-    while(bn->b[i].creator != -1) // parcours de la blockchain
-    {
-        while(bn->b[i].requests[j].sender != -1) // parcours de la liste des requêtes 
-        {
-            if(bn->b[i].requests[j].entitle == -1 &&
-               bn->b[i].requests[j].receiver == bn->num)
-            {
-                n++;
-            }
-            j++;
-        }
-        i++;
-    }
-    return n;
 }
 
 /* quand on reçoit une demande d'inscription d'un noeud participant :
@@ -445,6 +437,7 @@ int main(int argc, char ** argv)
 		block_n->requests[i].sender = -1;
 		block_n->requests[i].entitle = -1;
 		block_n->requests[i].receiver = -1;
+		block_n->pn[i] = -1;
 	}
 
     

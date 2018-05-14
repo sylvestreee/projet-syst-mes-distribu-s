@@ -27,7 +27,6 @@ int * ask_for_block_fraction(void * v)
 	return &pn->value;
 }
 
-
 void *node_participant(void *arg)
 {
     printf("launching server\n");
