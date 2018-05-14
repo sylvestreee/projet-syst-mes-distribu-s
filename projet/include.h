@@ -36,6 +36,7 @@ struct block_node {
 	int block_node_connect[10];
 	block b[10];
 	request requests[10];
+	participant_node pn[10];
 };
 
 typedef struct block_node block_node;

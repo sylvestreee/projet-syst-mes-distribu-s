@@ -115,6 +115,9 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 			sizeof (request), (xdrproc_t) xdr_request))
 			 return FALSE;
+		 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
+			sizeof (participant_node), (xdrproc_t) xdr_participant_node))
+			 return FALSE;
 		return TRUE;
 	} else if (xdrs->x_op == XDR_DECODE) {
 		buf = XDR_INLINE (xdrs, (1 + ( 10 )) * BYTES_PER_XDR_UNIT);
@@ -142,6 +145,9 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 			sizeof (request), (xdrproc_t) xdr_request))
 			 return FALSE;
+		 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
+			sizeof (participant_node), (xdrproc_t) xdr_participant_node))
+			 return FALSE;
 	 return TRUE;
 	}
 
@@ -155,6 +161,9 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 return FALSE;
 	 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 		sizeof (request), (xdrproc_t) xdr_request))
+		 return FALSE;
+	 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
+		sizeof (participant_node), (xdrproc_t) xdr_participant_node))
 		 return FALSE;
 	return TRUE;
 }
