@@ -14,6 +14,7 @@ struct request {
 };
 
 typedef struct request request;
+
 struct block {
 	int depth;
 	int creator;
@@ -30,16 +31,14 @@ struct participant_node {
 
 typedef struct participant_node participant_node;
 
-
 struct block_node {
 	int num;
 	int block_node_connect[10];
 	block b[10];
-	participant_node p[10];
 	request requests[10];
 };
-typedef struct block_node block_node;
 
+typedef struct block_node block_node;
 
 /* the xdr functions */
 

@@ -31,22 +31,26 @@ int *hello(void)
 
 int *create_block(block_node *bn)
 {	
-	static int r =0;
-	printf("create block %d\n",bn->b[0].depth);
+	static int r = 0;
+	printf("create block %d\n", bn->b[0].depth);
 	fflush(stdout);
 	int i = 0, length = array(bn->b);
-	block *bl = (block *) malloc(sizeof(block));
+	block bl;
     
 	// empty blockchain
 	if(bn->b[0].creator == -1)
 	{
-		bl->depth = 0;
-		bl->creator = bn->num;
+		bl.depth = 0;
+		bl.creator = bn->num;
 		// hash
-		while(bn->requests[i] != NULL)
+		while(bn->requests[i].sender != -1) // remplir le tableau du bloc / vider le tableau du noeud
 		{
-			bl->requests[i] = bn->requests[i];
-			bn->requests[i] = NULL;
+			bl.requests[i].sender = bn->requests[i].sender;
+            bl.requests[i].entitle = bn->requests[i].entitle;
+            bl.requests[i].receiver = bn->requests[i].receiver;
+            bn->requests[i].sender = -1;
+            bn->requests[i].entitle = "nothing";
+            bn->requests[i].receiver = -1;
 			i++;
 		}
 		bn->b[0] = bl;
@@ -54,13 +58,17 @@ int *create_block(block_node *bn)
 	// blockchain's not full
 	if(length < 10)
 	{
-		bl->depth = length;
-		bl->creator = bn->num;
+		bl.depth = length;
+		bl.creator = bn->num;
 		// hash
-		while(bn->requests[i] != NULL)
+		while(bn->requests[i].sender != -1)
 		{
-			b->requests[i] = bn->requests[i];
-			bn->requests[i] = NULL;
+			bl.requests[i].sender = bn->requests[i].sender;
+            bl.requests[i].entitle = bn->requests[i].entitle;
+            bl.requests[i].receiver = bn->requests[i].receiver;
+            bn->requests[i].sender = -1;
+            bn->requests[i].entitle = "nothing";
+            bn->requests[i].receiver = -1;
 			i++;
 		}
 		bn->b[length] = bl;
@@ -69,15 +77,15 @@ int *create_block(block_node *bn)
 	// blockchain's full
 	else if(length == 10)
 	{
-		free(bl);
 		r = -1;
 		return &r;
 	}
 
-	// transmit_blockchain_points
+	// transmit_blockchain_points function
 	printf("create block in %d\n", bn->num);
 	return &r;	
 }
+
 /*
 int * ask_for_blocks(void)
 {
@@ -94,12 +102,10 @@ int * transmit_requests(void)
     return 0;
 }
 
-/*
     int * transmit_blockchain_points(void)
     {
 
     }
-*/
 
 int participant_number(block_node *bn)
 {
@@ -133,6 +139,7 @@ int *ask_for_inscription()
         return -1;
     }
 }
+*/
 
 void *node(void *arg)
 {
@@ -208,6 +215,7 @@ int main(int argc, char ** argv)
 	int i = 0;
 	int PROGNUM;
 	int VERSNUM;
+    block b;
 
 	if(argc < 3 || argc >= 12)
 	{
@@ -228,7 +236,7 @@ int main(int argc, char ** argv)
 
 	for(i = 0; i<10; i++)
 	{
-		bn->b[i] = (block *) malloc(sizeof(block));
+		bn->b[i] = b;
 		bn->b[i].depth = -1;
 		bn->b[i].creator = -1;
 	}
