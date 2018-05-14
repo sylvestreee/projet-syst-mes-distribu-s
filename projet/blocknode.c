@@ -142,7 +142,10 @@ block_node * create_block(block_node * block_n)
 		return bn;
 	}
 
-	// transmit_blockchain_points function
+	// transmit_block pour chaque noeud voisin dans block_node_connect
+
+	// transmit_blockchain_points pour chaque participant dans pn
+
 	printf("create block in block_node %d and block %d\n", bn->num, length);
 	//printf_block_node(bn);
 	fflush(stdout);
@@ -277,11 +280,11 @@ int *ask_for_inscription(int num)
     return &t;
 }
 
-// renvoie la liste des requêtes en attente
-/*block *get_block()
+// renvoie la liste des participants
+block *get_participant()
 {
-    return bn->b;
-}*/
+    return block_n->pn;
+}
 
 void *node(void *arg)
 {
