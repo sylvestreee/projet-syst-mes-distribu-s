@@ -158,12 +158,12 @@ int request_number(block_node *bn)
  * - soit le noeud bloc n'a pas atteint la limite de bloc donc on ajoute le bloc (0)
  * - soit le noeud bloc a atteint la limite de bloc donc on n'ajoute pas le bloc (-1)
  */
-int *transmit_blocks(transmission * t)
+int *transmit_blocks(transmission * trans)
 {
     block_node *bn = block_n; // shouldn't exist
     static int t = 0, f = -1;
     int i = 0, j=0, length = block_number(bn);
-    block bl = t->bn->b[t->q];
+    block bl = trans->bn->b[trans->q];
     if(length < 10)
     {
         bn->b[length] = bl;
@@ -197,14 +197,13 @@ int *transmit_blocks(transmission * t)
  * - soit le tableau de requêtes n'est pas plein donc on ajoute la requête (0)
  * - soit le tableau de requêtes est plein donc on refuse la requête (-1)
  */
-int *transmit_requests(request rq)
+int *transmit_requests(transmission *t)
 {
-    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
     static int t = 0, f = -1;
-    int length = request_number(bn);
+    int length = request_number(block_n);
     if(length < 10)
     {
-        bn->requests[length] = rq;
+        block_n->requests[length] = t->bn->requests[t->q];
     }
     else if(length == 10)
     {
