@@ -131,37 +131,101 @@ block_node * create_block(block_node * block_n)
 	fflush(stdout);
 	return bn;	
 }
-
 /*
-int * ask_for_blocks(void)
-{
-    return 0;
-}
-
-int * transmit_blocks(void)
-{
-    return 0;
-}
-
-int * transmit_requests(void)
-{
-    return 0;
-}
-
-    int * transmit_blockchain_points(void)
+    int *ask_for_blocks(void)
     {
-
+        return 0;
     }
+*/
 
+// renvoie le nombre de blocs
+int block_number(block_node *bn)
+{
+    int i = 0;
+    while(bn->b[i].creator != -1)
+    {
+        i++;
+    }
+    return i;
+}
+
+/* quand on reçoit une transmission d'un bloc :
+ * - soit le noeud bloc n'a pas atteint la limite de bloc donc on ajoute le bloc (0)
+ * - soit le noeud bloc a pas atteint la limite de bloc donc on n'ajoute pas le bloc (-1)
+ */
+int *transmit_blocks(block bl)
+{
+    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    static int t = 0, f = -1;
+    int i = 0, length = block_number(bn);
+    if(length < 10)
+    {
+        bn->b[length] = bl;
+        while(bl->requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
+        {
+            for(j = 0; j < request_number(bn); j++) // parcours des requêtes en attente du noeud bloc
+            {
+                if(bl->requests[i].sender == bn->requests[j].sender &&
+                   bl->requests[i].entitle == bn->requests[j].entitle &&
+                   bl->requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
+                {
+                    bn->requests[j].sender = -1;
+                    bn->requests[j].entitle = -1;
+                    bn->requests[j].receiver = -1;
+                    break;
+                }
+            }
+            i++;        
+        }
+    }
+    else if(length == 10)
+    {
+        return &f;
+    }
+    return &t;
+}
+
+// renvoie le nombre de requêtes en attente
+int request_number(block_node *bn)
+{
+    int i = 0;
+    while(bn->requests[i].sender != -1)
+    {
+        i++;
+    }
+    return i;
+}
+
+/* quand on reçoit une requête d'un noeud bloc voisin :
+ * - soit le tableau de requêtes n'est pas plein donc on ajoute la requête (0)
+ * - soit le tableau de requêtes est plein donc on refuse la requête (-1)
+ */
+int *transmit_requests(request rq)
+{
+    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    static int t = 0, f = -1;
+    int length = request_number(bn);
+    if(length < 10)
+    {
+        bn->requests[length] = rq;
+    }
+    else if(length == 10)
+    {
+        return &f;
+    }
+    return &t;
+}
+
+// renvoie le nombre de participants inscrits
 int participant_number(block_node *bn)
 {
     int i = 0, j = 0, n;
-    while(bn->b[i] != NULL) // parcours de la blockchain
+    while(bn->b[i].creator != -1) // parcours de la blockchain
     {
-        while(bn->b[i].cleared_requests[j] != NULL) // parcours de la liste des requêtes 
+        while(bn->b[i].requests[j].sender != -1) // parcours de la liste des requêtes 
         {
-            if(bn->b[i].cleared_requests[j].receiver == bn->num &&
-               strcmp(bn->b[i].cleared_requests[j].entitle, "participant_inscription") == 0) 
+            if(bn->b[i].requests[j].entitle == -1 &&
+               bn->b[i].requests[j].receiver == bn->num)
             {
                 n++;
             }
@@ -172,20 +236,28 @@ int participant_number(block_node *bn)
     return n;
 }
 
-// when a participant node asked for an inscription
-int *ask_for_inscription()
+/* quand on reçoit une demande d'inscription d'un noeud participant :
+ * - soit le noeud bloc n'a pas atteint la limite de participants et son tableau de requêtes n'est pas plein
+     donc on ajoute la demande (0)
+ * - soit l'une des deux conditions n'est pas vérifiée donc on refuse la demande (-1)
+ */
+int *ask_for_inscription(int num)
 {
-    block_node *bn; // shouldn't exist
-    if(participant_number(bn) < NB)
+    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    static int t = 0, f = -1;
+    int length_p = participant_number(bn), length_r = request_number(bn);
+    if(length_p < 10 && length_r < 10)
     {
-        return 0;
+        bn->requests[length_r].sender = num;
+        bn->requests[length_r].entitle = -1;
+        bn->requests[length_r].receiver = bn->num;
     }
     else
     {
-        return -1;
+        return &f;
     }
+    return &t;
 }
-*/
 
 void *node(void *arg)
 {
