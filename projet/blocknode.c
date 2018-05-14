@@ -65,6 +65,7 @@ block initialize_block(block bl)
     }
     return bl;
 }
+
 block_node * create_block(block_node * block_n)
 {	
 	static block_node * bn = NULL;
@@ -125,12 +126,28 @@ block_node * create_block(block_node * block_n)
 	fflush(stdout);
 	return bn;	
 }
-/*
-    int *ask_for_blocks(void)
+
+/* quand on reçoit une demande de bloc (ou d'une chaîne de bloc) d'un noeud bloc voisin :
+ * - soit le tableau de requêtes n'est pas plein donc on ajoute la demande (0)
+ * - soit le tableau de requêtes est plein donc on refuse la demande (-1)
+ */
+int *ask_for_blocks(int num)
+{
+	block_node *bn = block_n;
+    static int t = 0, f = -1;
+    int length_r = request_number(bn);
+    if(length_r < 10)
     {
-        return 0;
+        bn->requests[length_r].sender = num;
+        bn->requests[length_r].entitle = 0;
+        bn->requests[length_r].receiver = bn->num;
     }
-*/
+    else
+    {
+        return &f;
+    }
+    return &t;
+}
 
 // renvoie le nombre de blocs
 int block_number(block_node *bn)
@@ -160,28 +177,31 @@ int request_number(block_node *bn)
  */
 int *transmit_blocks(transmission * trans)
 {
-    block_node *bn = block_n; // shouldn't exist
+	block_node *bn = block_n;
     static int t = 0, f = -1;
-    int i = 0, j=0, length = block_number(bn);
+    int i = 0, j = 0, length = block_number(bn);
     block bl = trans->bn->b[trans->q];
     if(length < 10)
     {
-        bn->b[length] = bl;
-        while(bl.requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
+        if(length == bl.depth) // empêcher un noeud bloc de recevoir un bloc d'une profondeur qu'il a déjà
         {
-            for(j = 0; j < request_number(bn); j++) // parcours des requêtes en attente du noeud bloc
+            bn->b[length] = bl;
+            while(bl.requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
             {
-                if(bl.requests[i].sender == bn->requests[j].sender &&
-                   bl.requests[i].entitle == bn->requests[j].entitle &&
-                   bl.requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
+                for(j = 0; j < request_number(bn); j++) // parcours des requêtes en attente du noeud bloc
                 {
-                    bn->requests[j].sender = -1;
-                    bn->requests[j].entitle = -1;
-                    bn->requests[j].receiver = -1;
-                    break;
+                    if(bl.requests[i].sender == bn->requests[j].sender &&
+                       bl.requests[i].entitle == bn->requests[j].entitle &&
+                       bl.requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
+                    {
+                        bn->requests[j].sender = -1;
+                        bn->requests[j].entitle = -1;
+                        bn->requests[j].receiver = -1;
+                        break;
+                    }
                 }
+                i++;        
             }
-            i++;        
         }
     }
     else if(length == 10)
@@ -193,13 +213,15 @@ int *transmit_blocks(transmission * trans)
     return &t;
 }
 
+// transmit_blockchain
+
 /* quand on reçoit une requête d'un noeud bloc voisin :
  * - soit le tableau de requêtes n'est pas plein donc on ajoute la requête (0)
  * - soit le tableau de requêtes est plein donc on refuse la requête (-1)
  */
 int *transmit_requests(request rq)
 {
-    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    block_node *bn = block_n;
     static int t = 0, f = -1;
     int length = request_number(bn);
     if(length < 10)
@@ -240,7 +262,7 @@ int participant_number(block_node *bn)
  */
 int *ask_for_inscription(int num)
 {
-    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    block_node *bn = block_n;
     static int t = 0, f = -1;
     int length_p = participant_number(bn), length_r = request_number(bn);
     if(length_p < 10 && length_r < 10)
@@ -254,6 +276,12 @@ int *ask_for_inscription(int num)
         return &f;
     }
     return &t;
+}
+
+// renvoie la liste des requêtes en attente
+block *get_block()
+{
+    return bn->b;
 }
 
 void *node(void *arg)

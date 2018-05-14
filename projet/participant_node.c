@@ -9,10 +9,18 @@
 
 #include "include.h"
 
+participant_node * participant_n = NULL;
+
 /* on utilise les thread pour lancer à la fois un serveur et un client pour un seul noeud*/
 
 void *transmit_blockchain_points(float value)
 {
-	participant_node *pn = (participant_node *) malloc(sizeof(participant_node)); // shouldn't exist
+	participant_node *pn = participant_n;
 	pn->value += value;
+}
+
+void *ask_for_block_fraction()
+{
+	participant_node *pn = participant_n;
+	return pn->value;
 }
