@@ -29,6 +29,20 @@ int *hello(void)
     return &r;
 }
 
+block initialize_block(block bl)
+{
+    int i;
+    bl.depth = -1;
+    bl.creator = -1;
+    for(i = 0; i < 10; i++)
+    {
+        bl.requests[i].sender = -1;
+        bl.requests[i].entitle = "nothing";
+        bl.requests[i].receiver = -1;
+    }
+    return bl;
+}
+
 int *create_block(block_node *bn)
 {	
 	static int r = 0;
@@ -215,7 +229,7 @@ int main(int argc, char ** argv)
 	int i = 0;
 	int PROGNUM;
 	int VERSNUM;
-    block b;
+    block bl = initialize_block(bl);
 
 	if(argc < 3 || argc >= 12)
 	{
@@ -236,7 +250,7 @@ int main(int argc, char ** argv)
 
 	for(i = 0; i<10; i++)
 	{
-		bn->b[i] = b;
+		bn->b[i] = bl;
 		bn->b[i].depth = -1;
 		bn->b[i].creator = -1;
 	}
