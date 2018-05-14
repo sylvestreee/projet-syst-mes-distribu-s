@@ -65,11 +65,36 @@ block initialize_block(block bl)
     }
     return bl;
 }
+
+// renvoie le nombre de requêtes en attente
+int request_number(block_node *bn)
+{
+    int i = 0;
+    while(bn->requests[i].sender != -1)
+    {
+        i++;
+    }
+    return i;
+}
+
+// renvoie le nombre de blocs
+int block_number(block_node *bn)
+{
+    int i = 0;
+    while(bn->b[i].creator != -1)
+    {
+        i++;
+    }
+    return i;
+}
+
 block_node * create_block(block_node * block_n)
 {	
+	enum clnt_stat stat;
+	static int res;	
 	static block_node * bn = NULL;
-	
-	bn = (block_node *)malloc(sizeof(block_node));
+	static transmission * trans;
+	trans = (transmission *) malloc(sizeof(transmission));
 
 	bn = block_n;
 	//printf("create block %d\n", bn->num);
@@ -119,39 +144,64 @@ block_node * create_block(block_node * block_n)
 		return bn;
 	}
 
-	// transmit_blockchain_points function
+	// transmit_block pour chaque noeud voisin dans block_node_connect
+	for(i = 0; i < 10; i++)
+	{
+		if(bn->block_node_connect[i] != 0)
+		{
+			trans->bn = bn;
+			trans->q = length;
+			stat = callrpc	("localhost",bn->block_node_connect[i],
+				bn->block_node_connect[i],2,
+        	            (xdrproc_t)xdr_transmission,(char *)trans,
+        	            (xdrproc_t)xdr_int,(char *)&res) ;
+		
+			if (stat != RPC_SUCCESS)
+        	        {
+        	            	fprintf(stderr, "Echec de l'appel distant\n");
+        	            	clnt_perrno(stat);
+        	            	fprintf(stderr, "\n");
+				pthread_exit(NULL);
+        	        }
+			if(res == 0)
+			{
+				printf("Transmission block number %d to block_node %d worked\n",
+					length,bn->block_node_connect[i]);
+			}				
+			else
+			{
+				printf("Transmission block number %d to block_node %d not worked\n",
+				length,bn->block_node_connect[i]);
+			}
+		}
+	}
+	// transmit_blockchain_points pour chaque participant dans pn
+
 	printf("create block in block_node %d and block %d\n", bn->num, length);
-	//printf_block_node(bn);
 	fflush(stdout);
 	return bn;	
 }
-/*
-    int *ask_for_blocks(void)
-    {
-        return 0;
-    }
-*/
 
-// renvoie le nombre de blocs
-int block_number(block_node *bn)
+/* quand on reçoit une demande de bloc (ou d'une chaîne de bloc) d'un noeud bloc voisin :
+ * - soit le tableau de requêtes n'est pas plein donc on ajoute la demande (0)
+ * - soit le tableau de requêtes est plein donc on refuse la demande (-1)
+ */
+int *ask_for_blocks(int num)
 {
-    int i = 0;
-    while(bn->b[i].creator != -1)
+    block_node *bn = block_n;
+    static int t = 0, f = -1;
+    int length_r = request_number(bn);
+    if(length_r < 10)
     {
-        i++;
+        bn->requests[length_r].sender = num;
+        bn->requests[length_r].entitle = 0;
+        bn->requests[length_r].receiver = bn->num;
     }
-    return i;
-}
-
-// renvoie le nombre de requêtes en attente
-int request_number(block_node *bn)
-{
-    int i = 0;
-    while(bn->requests[i].sender != -1)
+    else
     {
-        i++;
+        return &f;
     }
-    return i;
+    return &t;
 }
 
 /* quand on reçoit une transmission d'un bloc :
@@ -160,50 +210,54 @@ int request_number(block_node *bn)
  */
 int *transmit_blocks(transmission * trans)
 {
-    block_node *bn = block_n; // shouldn't exist
+    block_node *bn = block_n;
     static int t = 0, f = -1;
-    int i = 0, j=0, length = block_number(bn);
+    int i = 0, j = 0, length = block_number(bn);
     block bl = trans->bn->b[trans->q];
     if(length < 10)
     {
-        bn->b[length] = bl;
-        while(bl.requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
+        if(length == bl.depth) // empêcher un noeud bloc de recevoir un bloc d'une profondeur qu'il a déjà
         {
-            for(j = 0; j < request_number(bn); j++) // parcours des requêtes en attente du noeud bloc
+            bn->b[length] = bl;
+            while(bl.requests[i].sender != -1) // parcours des requêtes présentes dans le bloc
             {
-                if(bl.requests[i].sender == bn->requests[j].sender &&
-                   bl.requests[i].entitle == bn->requests[j].entitle &&
-                   bl.requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
+                for(j = 0; j < request_number(bn); j++) // parcours des requêtes en attente du noeud bloc
                 {
-                    bn->requests[j].sender = -1;
-                    bn->requests[j].entitle = -1;
-                    bn->requests[j].receiver = -1;
-                    break;
+                    if(bl.requests[i].sender == bn->requests[j].sender &&
+                       bl.requests[i].entitle == bn->requests[j].entitle &&
+                       bl.requests[i].receiver == bn->requests[j].receiver) // correspondance trouvée
+                    {
+                        bn->requests[j].sender = -1;
+                        bn->requests[j].entitle = -1;
+                        bn->requests[j].receiver = -1;
+                        break;
+                    }
                 }
+                i++;        
             }
-            i++;        
         }
     }
     else if(length == 10)
     {
         return &f;
     }
-    printf_block_node(bn);
     block_n = bn;
     return &t;
 }
+
+// transmit_blockchain
 
 /* quand on reçoit une requête d'un noeud bloc voisin :
  * - soit le tableau de requêtes n'est pas plein donc on ajoute la requête (0)
  * - soit le tableau de requêtes est plein donc on refuse la requête (-1)
  */
-int *transmit_requests(transmission *t)
+int *transmit_requests(transmission *trans)
 {
     static int t = 0, f = -1;
     int length = request_number(block_n);
     if(length < 10)
     {
-        block_n->requests[length] = t->bn->requests[t->q];
+        block_n->requests[length] = trans->bn->requests[trans->q];
     }
     else if(length == 10)
     {
@@ -239,20 +293,26 @@ int participant_number(block_node *bn)
  */
 int *ask_for_inscription(int num)
 {
-    block_node *bn = (block_node *) malloc(sizeof(block_node)); // shouldn't exist
+    //block_node *bn = block_n;
     static int t = 0, f = -1;
-    int length_p = participant_number(bn), length_r = request_number(bn);
+    int length_p = participant_number(block_n), length_r = request_number(block_n);
     if(length_p < 10 && length_r < 10)
     {
-        bn->requests[length_r].sender = num;
-        bn->requests[length_r].entitle = -1;
-        bn->requests[length_r].receiver = bn->num;
+        block_n->requests[length_r].sender = num;
+        block_n->requests[length_r].entitle = -1;
+        block_n->requests[length_r].receiver = block_n->num;
     }
     else
     {
         return &f;
     }
     return &t;
+}
+
+// renvoie la liste des participants
+block *get_participant()
+{
+    return block_n->pn;
 }
 
 void *node(void *arg)
@@ -319,9 +379,6 @@ void *node(void *arg)
 			printf("choose block between 0 and 9 : ");
 			scanf("%d",&ask);
 		}
-		
-		b = bn->b[ask];
-		printf_block(b);
 
 		t->bn = bn;
 		t->q = ask;
@@ -410,7 +467,24 @@ int main(int argc, char ** argv)
 		fprintf(stderr, "unable to register 'transmit_block' !\n");
 	        return EXIT_FAILURE;
 	}
-
+	if(registerrpc(PROGNUM,VERSNUM, 3, transmit_requests,
+		(xdrproc_t)xdr_transmission, (xdrproc_t)xdr_int) == -1)
+	{
+		fprintf(stderr, "unable to register 'transmit_block' !\n");
+	        return EXIT_FAILURE;
+	}
+	if(registerrpc(PROGNUM,VERSNUM, 4, ask_for_inscription,
+		(xdrproc_t)xdr_int, (xdrproc_t)xdr_int) == -1)
+	{
+		fprintf(stderr, "unable to register 'transmit_block' !\n");
+	        return EXIT_FAILURE;
+	}
+	if(registerrpc(PROGNUM,VERSNUM, 5, ask_for_blocks,
+		(xdrproc_t)xdr_int, (xdrproc_t)xdr_int) == -1)
+	{
+		fprintf(stderr, "unable to register 'transmit_block' !\n");
+	        return EXIT_FAILURE;
+	}
 	printf("thread launched\n");
 	svc_run();
 

@@ -90,9 +90,11 @@ int block_number(block_node *bn)
 
 block_node * create_block(block_node * block_n)
 {	
+	enum clnt_stat stat;
+	static int res;	
 	static block_node * bn = NULL;
-	
-	bn = (block_node *)malloc(sizeof(block_node));
+	static transmission * trans;
+	trans = (transmission *) malloc(sizeof(transmission));
 
 	bn = block_n;
 	//printf("create block %d\n", bn->num);
@@ -143,11 +145,39 @@ block_node * create_block(block_node * block_n)
 	}
 
 	// transmit_block pour chaque noeud voisin dans block_node_connect
-
+	for(i = 0; i < 10; i++)
+	{
+		if(bn->block_node_connect[i] != 0)
+		{
+			trans->bn = bn;
+			trans->q = length;
+			stat = callrpc	("localhost",bn->block_node_connect[i],
+				bn->block_node_connect[i],2,
+        	            (xdrproc_t)xdr_transmission,(char *)trans,
+        	            (xdrproc_t)xdr_int,(char *)&res) ;
+		
+			if (stat != RPC_SUCCESS)
+        	        {
+        	            	fprintf(stderr, "Echec de l'appel distant\n");
+        	            	clnt_perrno(stat);
+        	            	fprintf(stderr, "\n");
+				pthread_exit(NULL);
+        	        }
+			if(res == 0)
+			{
+				printf("Transmission block number %d to block_node %d worked\n",
+					length,bn->block_node_connect[i]);
+			}				
+			else
+			{
+				printf("Transmission block number %d to block_node %d not worked\n",
+				length,bn->block_node_connect[i]);
+			}
+		}
+	}
 	// transmit_blockchain_points pour chaque participant dans pn
 
 	printf("create block in block_node %d and block %d\n", bn->num, length);
-	//printf_block_node(bn);
 	fflush(stdout);
 	return bn;	
 }
@@ -211,8 +241,8 @@ int *transmit_blocks(transmission * trans)
     {
         return &f;
     }
-    printf_block_node(bn);
     block_n = bn;
+    printf("Receive block from block node %d\n",trans->bn->num);
     return &t;
 }
 
@@ -350,9 +380,6 @@ void *node(void *arg)
 			printf("choose block between 0 and 9 : ");
 			scanf("%d",&ask);
 		}
-		
-		b = bn->b[ask];
-		printf_block(b);
 
 		t->bn = bn;
 		t->q = ask;
