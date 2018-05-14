@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "include.h"
 
-/* on utilise les thread pour lancer à la fois un server et un client pour un seul noeud*/
+/* on utilise les thread pour lancer à la fois un serveur et un client pour un seul noeud*/
 
 int array(block * b)
 {
@@ -80,23 +81,58 @@ int *create_block(block_node *bn)
 /*
 int * ask_for_blocks(void)
 {
-
+    return 0;
 }
 
 int * transmit_blocks(void)
 {
-
+    return 0;
 }
 
 int * transmit_requests(void)
 {
-
+    return 0;
 }
 
-int * transmit_blockchain_points(void)
-{
+/*
+    int * transmit_blockchain_points(void)
+    {
 
-} */
+    }
+*/
+
+int participant_number(block_node *bn)
+{
+    int i = 0, j = 0, n;
+    while(bn->b[i] != NULL) // parcours de la blockchain
+    {
+        while(bn->b[i].cleared_requests[j] != NULL) // parcours de la liste des requêtes 
+        {
+            if(bn->b[i].cleared_requests[j].receiver == bn->num &&
+               strcmp(bn->b[i].cleared_requests[j].entitle, "participant_inscription") == 0) 
+            {
+                n++;
+            }
+            j++;
+        }
+        i++;
+    }
+    return n;
+}
+
+// when a participant node asked for an inscription
+int *ask_for_inscription()
+{
+    block_node *bn; // shouldn't exist
+    if(participant_number(bn) < NB)
+    {
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
 
 void *node(void *arg)
 {
@@ -182,7 +218,6 @@ int main(int argc, char ** argv)
 	block_node * bn = (block_node *) malloc(sizeof(block_node));
 	bn->num = atoi(argv[1]);
 	
-
 	PROGNUM = bn->num;
 	VERSNUM = bn->num;
 
@@ -193,6 +228,8 @@ int main(int argc, char ** argv)
 
 	for(i = 0; i<10; i++)
 	{
+		bn->b[i] = (block *) malloc(sizeof(block));
+		bn->b[i].depth = -1;
 		bn->b[i].creator = -1;
 	}
     

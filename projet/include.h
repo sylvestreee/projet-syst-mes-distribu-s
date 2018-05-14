@@ -7,27 +7,27 @@
 extern "C" {
 #endif
 
-
 struct request {
 	int sender;
 	char * entitle;
 	int receiver;
 };
+
 typedef struct request request;
-
-
 struct block {
 	int depth;
 	int creator;
+	// hash
 	request requests[10];
 };
-typedef struct block block;
 
+typedef struct block block;
 
 struct participant_node {
 	int value;
 	int block_node_connect[10];
 };
+
 typedef struct participant_node participant_node;
 
 
