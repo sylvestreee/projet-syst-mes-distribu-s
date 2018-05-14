@@ -89,6 +89,7 @@ xdr_participant_node (XDR *xdrs, participant_node *objp)
 		 return FALSE;
 	return TRUE;
 }
+
 bool_t
 xdr_block_node (XDR *xdrs, block_node *objp)
 {
@@ -122,9 +123,21 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 			sizeof (request), (xdrproc_t) xdr_request))
 			 return FALSE;
-		 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
-			sizeof (participant_node), (xdrproc_t) xdr_participant_node))
-			 return FALSE;
+		buf = XDR_INLINE (xdrs, ( 10 ) * BYTES_PER_XDR_UNIT);
+		if (buf == NULL) {
+			 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
+				sizeof (int), (xdrproc_t) xdr_int))
+				 return FALSE;
+		} else {
+			{
+				register int *genp;
+
+				for (i = 0, genp = objp->pn;
+					i < 10; ++i) {
+					IXDR_PUT_LONG(buf, *genp++);
+				}
+			}
+		}
 		return TRUE;
 	} else if (xdrs->x_op == XDR_DECODE) {
 		buf = XDR_INLINE (xdrs, (1 + ( 10 )) * BYTES_PER_XDR_UNIT);
@@ -152,9 +165,21 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		 if (!xdr_vector (xdrs, (char *)objp->requests, 10,
 			sizeof (request), (xdrproc_t) xdr_request))
 			 return FALSE;
-		 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
-			sizeof (participant_node), (xdrproc_t) xdr_participant_node))
-			 return FALSE;
+		buf = XDR_INLINE (xdrs, ( 10 ) * BYTES_PER_XDR_UNIT);
+		if (buf == NULL) {
+			 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
+				sizeof (int), (xdrproc_t) xdr_int))
+				 return FALSE;
+		} else {
+			{
+				register int *genp;
+
+				for (i = 0, genp = objp->pn;
+					i < 10; ++i) {
+					*genp++ = IXDR_GET_LONG(buf);
+				}
+			}
+		}
 	 return TRUE;
 	}
 
@@ -170,7 +195,7 @@ xdr_block_node (XDR *xdrs, block_node *objp)
 		sizeof (request), (xdrproc_t) xdr_request))
 		 return FALSE;
 	 if (!xdr_vector (xdrs, (char *)objp->pn, 10,
-		sizeof (participant_node), (xdrproc_t) xdr_participant_node))
+		sizeof (int), (xdrproc_t) xdr_int))
 		 return FALSE;
 	return TRUE;
 }
