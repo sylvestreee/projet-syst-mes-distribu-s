@@ -74,10 +74,6 @@ block initialize_block(block bl)
 block_node * create_block(block_node * block_n)
 {	
 	static block_node * bn = NULL;
-	if(bn != NULL)
-	{
-		free(bn);
-	}
 	
 	bn = (block_node *)malloc(sizeof(block_node));
 
@@ -105,7 +101,7 @@ block_node * create_block(block_node * block_n)
 		bn->b[0] = bl;
 	}
 	// blockchain's not full
-	if(length > 1 && length < 10)
+	if(length >= 1 && length < 10)
 	{
 		bl.depth = length;
 		bl.creator = bn->num;
@@ -238,12 +234,12 @@ void *node(void *arg)
 					pthread_exit(NULL);
                 }
 
-		
-		printf("-------------BLOCK_NODE BN----------------\n");
-		//printf_block_node(bn);
 		printf("-------------BLOCK_NODE BN_RES----------------\n");
 		printf_block_node(bn_res);
 		bn = bn_res;
+		
+		printf("-------------BLOCK_NODE BN----------------\n");
+		printf_block_node(bn);
                 break;
             case 2:
 				break;

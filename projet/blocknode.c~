@@ -74,10 +74,6 @@ block initialize_block(block bl)
 block_node * create_block(block_node * block_n)
 {	
 	static block_node * bn = NULL;
-	if(bn != NULL)
-	{
-		free(bn);
-	}
 	
 	bn = (block_node *)malloc(sizeof(block_node));
 
@@ -203,6 +199,7 @@ void *node(void *arg)
     static int res;
 	block_node * bn_res = (block_node*) malloc(sizeof(block_node));
 	bn_res = bn;
+	printf_block_node(bn);
 
     while(stop != 1)
     {
@@ -227,7 +224,7 @@ void *node(void *arg)
             case 1:
 		stat = callrpc("localhost",bn->num,bn->num,2,
                     (xdrproc_t)xdr_block_node,(char *)bn,
-                    (xdrproc_t)xdr_block_node,bn_res) ;
+                    (xdrproc_t)xdr_block_node,(char *)bn_res) ;
 
                 if (stat != RPC_SUCCESS)
                 {
@@ -237,12 +234,12 @@ void *node(void *arg)
 					pthread_exit(NULL);
                 }
 
-		
-		printf("-------------BLOCK_NODE BN----------------\n");
-		//printf_block_node(bn);
 		printf("-------------BLOCK_NODE BN_RES----------------\n");
 		printf_block_node(bn_res);
 		bn = bn_res;
+		
+		printf("-------------BLOCK_NODE BN----------------\n");
+		printf_block_node(bn);
                 break;
             case 2:
 				break;
